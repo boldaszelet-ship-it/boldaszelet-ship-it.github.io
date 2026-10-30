@@ -1,0 +1,29 @@
+name: Valóban weboldal frissítése
+on:
+  schedule:
+    - cron: "17 */2 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: valoban
+  cancel-in-progress: false
+jobs:
+  frissit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow==12.0.0
+      - run: python3 tools/valoban/epit.py --frissit
+      - name: Változás közzététele
+        run: |
+          git config user.name "valoban-web"
+          git config user.email "valoban-web@users.noreply.github.com"
+          git add valoban tools/valoban/videok.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Weboldal: új videók"
+          git push
