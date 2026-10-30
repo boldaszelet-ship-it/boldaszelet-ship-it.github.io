@@ -25,7 +25,7 @@ from PIL import Image
 GYOKER = Path(__file__).resolve().parents[2]
 ADAT = Path(__file__).with_name("videok.json")
 WEB = GYOKER / "valoban"
-BOLD = "https://boldaszelet-ship-it.github.io/valoban/"
+BOLD = "https://valoban.pages.dev/"  # a GitHub-cím is él: a Google és a TikTok arra hivatkozik
 CSATORNA = "UC7E2Nop5attkRyAdKO_RPlA"
 RSS = f"https://www.youtube.com/feeds/videos.xml?channel_id={CSATORNA}"
 YT = "https://www.youtube.com/@valobanhun"
@@ -231,7 +231,7 @@ def lap(cim, leiras, tartalom, utvonal, elo="", kep_ut="profil.png", extra=""):
 </main>
 <footer class="lab"><div>
 <p class="koveto"><a href="{YT}" rel="noopener">YouTube</a><a href="{TT}" rel="noopener">TikTok</a><a href="{FB}" rel="noopener">Facebook</a></p>
-<p>Üzemeltető: Boldurián Gábor, 1191 Budapest, Dobó Katica utca 13. · <a href="mailto:boldaszelet@gmail.com">boldaszelet@gmail.com</a> · Tárhely: GitHub, Inc.</p>
+<p>Üzemeltető: Boldurián Gábor, 1191 Budapest, Dobó Katica utca 13. · <a href="mailto:boldaszelet@gmail.com">boldaszelet@gmail.com</a> · Tárhely: GitHub, Inc. · Kiszolgálás: Cloudflare, Inc.</p>
 <p><a href="{elo}adatvedelem.html">Adatkezelési tájékoztató</a> · Az oldal nem használ sütit és látogatómérést.</p>
 </div></footer>
 </body>

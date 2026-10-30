@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://boldaszelet-ship-it.github.io/valoban/sitemap.xml
+Sitemap: https://valoban.pages.dev/sitemap.xml
