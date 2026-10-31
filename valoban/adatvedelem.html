@@ -63,11 +63,13 @@ YouTube-csatorna (https://www.youtube.com/@valobanhun) saját videóit tölti fe
 adatkezelő használja; más felhasználók nem jelentkeznek be vele, és más fiókok adataihoz nem fér hozzá.</p>
 <ul>
 <li>Kezelt adatok: a csatorna Google-fiókjához kiadott OAuth hozzáférési és frissítő token, a csatorna azonosítója és
-neve, valamint a csatornára feltöltött saját videók, bélyegképek, feliratok és lejátszási listák adatai.</li>
-<li>Az adatkezelés célja: a csatorna saját videóinak feltöltése, ütemezése és visszaellenőrzése.</li>
-<li>Jogosultságok (scope): youtube.upload, youtube.force-ssl.</li>
-<li>Tárolás: a token kizárólag az adatkezelő saját számítógépén, hozzáférés-korlátozott fájlban tárolódik; harmadik
-félnek nem kerül átadásra.</li>
+neve, a csatornára feltöltött saját videók, bélyegképek, feliratok és lejátszási listák adatai, a csatorna nézettségi és
+feliratkozási statisztikái, valamint a csatorna videói alatti nyilvános kommentek szövege és a szerzők nyilvános YouTube-neve.</li>
+<li>Az adatkezelés célja: a csatorna saját videóinak feltöltése, ütemezése és visszaellenőrzése, a lejátszási listák és a
+csatornaoldal kezelése, a nézői kommentek megválaszolása, valamint a csatorna teljesítményének mérése.</li>
+<li>Jogosultságok (scope): youtube.upload, youtube.force-ssl, yt-analytics.readonly.</li>
+<li>Tárolás: a token kizárólag az adatkezelő saját számítógépén, hozzáférés-korlátozott fájlban tárolódik. A mérési adatok
+az adatkezelő saját számítógépén és privát Git-tárolóban vannak; harmadik félnek nem kerülnek átadásra.</li>
 <li>Időtartam: a hozzáférés visszavonásáig. A hozzáférés bármikor visszavonható a Google-fiók biztonsági beállításaiban:
 https://myaccount.google.com/permissions</li>
 <li>Az alkalmazás a YouTube API-szolgáltatásokat használja. A YouTube Általános Szerződési Feltételei:
