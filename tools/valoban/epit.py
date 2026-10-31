@@ -37,6 +37,8 @@ UA = {"User-Agent": "Mozilla/5.0 (valoban-weboldal)"}
 NS = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015",
       "m": "http://search.yahoo.com/mrss/"}
 BEMUTATO = {"AYiHXjghiBo"}  # a csatornabemutató 16:9, nem rész
+HIRLEVEL = False  # D-valoban-20261031-07: csak a Brevo-fiók és a tájékoztató élesítése után kapcsolható be
+FELIRATKOZAS = BOLD + "feliratkozas"  # a pages/_worker.js fogadja, ezért a látogató böngészőjébe nem kerül harmadik fél
 E = lambda s: html.escape(str(s), quote=True)
 
 
@@ -201,6 +203,15 @@ def kartya(v, elo=""):
             f'<span class="cim">{E(tiszta_cim(v["cim"]))}</span><span class="meta">{E(meta)}</span></a></li>')
 
 
+def urlap(elo=""):
+    return f"""<form class="hirlevel-urlap" method="post" action="{FELIRATKOZAS}">
+<label for="email">E-mail-címed</label>
+<div class="hirlevel-sor"><input id="email" name="email" type="email" required autocomplete="email" inputmode="email" placeholder="nev@pelda.hu"><button class="gomb" type="submit">Kérem a hírlevelet</button></div>
+<div class="csapda" aria-hidden="true"><label>Weboldal<input name="weboldal" tabindex="-1" autocomplete="off"></label></div>
+<label class="hozzajarulas"><input type="checkbox" name="hozzajarulas" value="igen" required><span>Elmúltam 16 éves, és kérem a Valóban? heti hírlevelét. Bármikor leiratkozhatok. Az <a href="{elo}adatvedelem.html">adatkezelési tájékoztatót</a> elolvastam.</span></label>
+</form>"""
+
+
 def lap(cim, leiras, tartalom, utvonal, elo="", kep_ut="profil.png", extra=""):
     return f"""<!doctype html>
 <html lang="hu">
@@ -225,7 +236,7 @@ def lap(cim, leiras, tartalom, utvonal, elo="", kep_ut="profil.png", extra=""):
 <body>
 <a class="ugras" href="#tartalom">Ugrás a tartalomra</a>
 <header class="fej"><a class="marka" href="{elo or './'}"><img src="{elo}profil.png" width="40" height="40" alt=""><span>Valóban<i>?</i></span></a>
-<nav aria-label="Fő"><a href="{elo}videok.html">Videók</a><a href="{elo or './'}#igy">Így dolgozunk</a><a class="yt" href="{YT}" rel="noopener">YouTube</a></nav></header>
+<nav aria-label="Fő"><a href="{elo}videok.html">Videók</a><a href="{elo or './'}#igy">Így dolgozunk</a>{f'<a href="{elo}hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}<a class="yt" href="{YT}" rel="noopener">YouTube</a></nav></header>
 <main id="tartalom">
 {tartalom}
 </main>
@@ -255,7 +266,7 @@ def kezdolap(v):
 <ul class="racs">{''.join(kartya(x) for x in hosszu[:6])}</ul></section>
 <section><div class="sor"><h2>Legújabb Shorts-videók</h2><a href="videok.html#shorts">Összes</a></div>
 <ul class="racs szuk">{''.join(kartya(x) for x in shorts[:12])}</ul></section>
-<section id="igy" class="igy"><h2>Így dolgozunk</h2><ol>
+{hirlevel_blokk() if HIRLEVEL else ''}<section id="igy" class="igy"><h2>Így dolgozunk</h2><ol>
 <li><b>Egy téma, világos válasz</b>Minden rész egy kérdésre, állításra vagy rangsorra épül. Nem az a cél, hogy jól hangozzon, hanem hogy kiderüljön, mi igaz.</li>
 <li><b>A források nyilvánosak</b>Minden videónál felsoroljuk, honnan tudjuk, amit mondunk, így bárki utánanézhet. Itt az oldalon is, videónként.</li>
 <li><b>Nyíltan a gépi hangról</b>A narrációt gép olvassa fel, nem ember. Ezt minden videó leírásában közöljük.</li>
@@ -267,6 +278,36 @@ def kezdolap(v):
     return lap("Valóban? – magyar ismeretterjesztő csatorna",
                "Valóban? – magyar ismeretterjesztő csatorna: ismert történetek, állítások és rangsorok, forrásokkal. Végére járunk.",
                t, "", extra=f'\n<script type="application/ld+json">{ld}</script>')
+
+
+def hirlevel_blokk():
+    return f"""<section class="hirlevel"><h2>A hét legjobb kérdései, forrással</h2>
+<p>Hetente egy levél: mit ellenőriztünk, mi derült ki, és honnan tudjuk.</p>{urlap()}</section>
+"""
+
+
+def hirlevel_lapok():
+    nincs = '\n<meta name="robots" content="noindex">'
+    hibak = {"email": "Ez nem tűnik érvényes e-mail-címnek.", "hozzajarulas": "A feliratkozáshoz be kell jelölnöd a négyzetet.",
+             "sok": "Túl sok próbálkozás érkezett innen. Próbáld újra egy óra múlva.",
+             "rendszer": "Most nem sikerült a feliratkozás. Próbáld újra később."}
+    jelzo = f"""<p id="hiba" class="hirlevel-hiba" role="alert" hidden></p>
+<script>(function(){{var h={json.dumps(hibak, ensure_ascii=False)}[new URLSearchParams(location.search).get('hiba')],e=document.getElementById('hiba');if(h){{e.textContent=h;e.hidden=false}}}})();</script>"""
+    return {
+        "hirlevel.html": lap("Hírlevél – Valóban?", "A Valóban? heti hírlevele: a hét legjobb kérdései, a válaszokkal és a forrásokkal.",
+                             f"""<section class="hirlevel"><h1>A hét legjobb kérdései, forrással</h1>
+<p>Hetente egy levél: mit ellenőriztünk, mi derült ki, és honnan tudjuk. Nincs reklám, és egy kattintással leiratkozhatsz.</p>{jelzo}{urlap()}</section>""",
+                             "hirlevel.html"),
+        "megerosites.html": lap("Már csak egy kattintás – Valóban?", "Erősítsd meg a feliratkozásodat a Valóban? hírlevelére.",
+                                """<section class="hirlevel"><h1>Már csak egy kattintás</h1>
+<p>Küldtünk egy levelet. Kattints a benne lévő gombra, és kész. Ha nem találod, nézd meg a levélszemét mappát is.</p></section>""",
+                                "megerosites.html", extra=nincs),
+        "koszonjuk.html": lap("Feliratkoztál – Valóban?", "Feliratkoztál a Valóban? hírlevelére.",
+                              f"""<section class="hirlevel"><h1>Köszönjük, feliratkoztál</h1>
+<p>Az első levél a következő heti kiadással érkezik. Addig is itt az összes rész forrásokkal.</p>
+<p class="gombok"><a class="gomb" href="videok.html">Videók</a><a class="gomb masod" href="{YT}?sub_confirmation=1" rel="noopener">Feliratkozom YouTube-on</a></p></section>""",
+                              "koszonjuk.html", extra=nincs),
+    }
 
 
 def archivum(v):
@@ -310,7 +351,7 @@ def videolap(x, tobbi, par=None):
     t = f"""<article class="vid{' vid-allo' if x['tipus'] == 'shorts' else ''}">
 <a class="vid-kep" href="{url}" rel="noopener"><img src="../k/{x['id']}.jpg" alt="" width="{360 if x['tipus'] == 'shorts' else 640}" height="{640 if x['tipus'] == 'shorts' else 360}"><span class="play">Megnézem a YouTube-on</span></a>
 <div class="vid-sz"><p class="meta">{E(meta)}</p><h1>{E(cim)}</h1>{szov}
-<p class="gombok">{f'<a class="gomb" href="{par["id"]}.html">A teljes rész</a>' if par else ''}<a class="gomb{' masod' if par else ''}" href="{YT}?sub_confirmation=1" rel="noopener">Feliratkozom</a></p>
+<p class="gombok">{f'<a class="gomb" href="{par["id"]}.html">A teljes rész</a>' if par else ''}<a class="gomb{' masod' if par else ''}" href="{YT}?sub_confirmation=1" rel="noopener">Feliratkozom</a>{'<a class="gomb masod" href="../hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}</p>
 {f'<h2>Források</h2><ol class="forrasok">{src}</ol>' if src else ''}
 {f'<p class="meta kozles">{linkes(" ".join(gep))}</p>' if gep else ''}
 {'<details class="kredit"><summary>Képek és kreditek</summary>' + ''.join(f'<p>{linkes(k)}</p>' for k in kredit) + '</details>' if kredit else ''}
@@ -320,7 +361,7 @@ def videolap(x, tobbi, par=None):
 
 
 def terkep(v):
-    u = [BOLD, BOLD + "videok.html", BOLD + "adatvedelem.html"] + [f"{BOLD}v/{x['id']}.html" for x in v]
+    u = [BOLD, BOLD + "videok.html", BOLD + "adatvedelem.html"] + ([BOLD + "hirlevel.html"] if HIRLEVEL else []) + [f"{BOLD}v/{x['id']}.html" for x in v]
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             + "".join(f"<url><loc>{E(a)}</loc></url>\n" for a in u) + "</urlset>\n")
 
@@ -345,6 +386,9 @@ def main():
     (WEB / "index.html").write_text(kezdolap(lathato))
     (WEB / "videok.html").write_text(archivum(lathato))
     (WEB / "sitemap.xml").write_text(terkep(lathato))
+    if HIRLEVEL:
+        for nev, tartalom in hirlevel_lapok().items():
+            (WEB / nev).write_text(tartalom)
     print(f"{len(lathato)} videó, {len(videok) - len(lathato)} rejtett")
 
 
