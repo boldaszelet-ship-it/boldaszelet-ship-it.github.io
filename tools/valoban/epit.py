@@ -284,7 +284,19 @@ g.forEach(function(b){{b.addEventListener('click',function(){{f=b.dataset.f;m()}
     return lap("Videók – Valóban?", f"A Valóban? csatorna {len(v)} videója: keresés cím szerint, hosszú részek és Shorts-videók.", t, "videok.html")
 
 
-def videolap(x, tobbi):
+def parok(v):
+    """Shorts → teljes rész: a leírásban lévő youtu.be-link adja a párt."""
+    hosszuk = {x["id"]: x for x in v if x["tipus"] == "hosszu"}
+    ki = {}
+    for x in v:
+        if x["tipus"] == "shorts":
+            m = next((i for i in re.findall(r"youtu\.be/([\w-]{11})", x["leiras"]) if i in hosszuk), None)
+            if m:
+                ki[x["id"]] = hosszuk[m]
+    return ki
+
+
+def videolap(x, tobbi, par=None):
     bek, forras, kredit, gep = bont(x["leiras"])
     cim = tiszta_cim(x["cim"])
     url = f"https://www.youtube.com/shorts/{x['id']}" if x["tipus"] == "shorts" else f"https://www.youtube.com/watch?v={x['id']}"
@@ -298,6 +310,7 @@ def videolap(x, tobbi):
     t = f"""<article class="vid{' vid-allo' if x['tipus'] == 'shorts' else ''}">
 <a class="vid-kep" href="{url}" rel="noopener"><img src="../k/{x['id']}.jpg" alt="" width="{360 if x['tipus'] == 'shorts' else 640}" height="{640 if x['tipus'] == 'shorts' else 360}"><span class="play">Megnézem a YouTube-on</span></a>
 <div class="vid-sz"><p class="meta">{E(meta)}</p><h1>{E(cim)}</h1>{szov}
+<p class="gombok">{f'<a class="gomb" href="{par["id"]}.html">A teljes rész</a>' if par else ''}<a class="gomb{' masod' if par else ''}" href="{YT}?sub_confirmation=1" rel="noopener">Feliratkozom</a></p>
 {f'<h2>Források</h2><ol class="forrasok">{src}</ol>' if src else ''}
 {f'<p class="meta kozles">{linkes(" ".join(gep))}</p>' if gep else ''}
 {'<details class="kredit"><summary>Képek és kreditek</summary>' + ''.join(f'<p>{linkes(k)}</p>' for k in kredit) + '</details>' if kredit else ''}
@@ -322,12 +335,13 @@ def main():
         kep(v)
     (WEB / "v").mkdir(exist_ok=True)
     elo = {f"{v['id']}.html" for v in lathato}
+    par = parok(lathato)
     for f in (WEB / "v").glob("*.html"):
         if f.name not in elo:
             f.unlink()
     for n, v in enumerate(lathato):
         tobbi = [x for x in lathato[n + 1:] + lathato[:n] if x["tipus"] == v["tipus"] and x["id"] not in BEMUTATO][:6]
-        (WEB / "v" / f"{v['id']}.html").write_text(videolap(v, tobbi))
+        (WEB / "v" / f"{v['id']}.html").write_text(videolap(v, tobbi, par.get(v["id"])))
     (WEB / "index.html").write_text(kezdolap(lathato))
     (WEB / "videok.html").write_text(archivum(lathato))
     (WEB / "sitemap.xml").write_text(terkep(lathato))
