@@ -45,7 +45,7 @@ BEMUTATO = {"AYiHXjghiBo"}  # a csatornabemutató 16:9, nem rész
 HIRLEVEL = False  # D-valoban-20261031-07: csak a Brevo-fiók és a tájékoztató élesítése után kapcsolható be
 LEJATSZO = False  # D-valoban-20261101-08: a YouTube-lejátszó harmadik fél, csak a tájékoztató módosítása után kapcsolható be
 FELIRATKOZAS = BOLD + "feliratkozas"  # a pages/_worker.js fogadja, ezért a látogató böngészőjébe nem kerül harmadik fél
-TEMAKULDO = False  # D-valoban-20261101-04: csak a tájékoztató, a KV-kötés és a Worker élesítése után kapcsolható be
+TEMAKULDO = True  # D-valoban-20261101-04: a TEMAK KV-t a wrangler.toml köti a Workerhez
 TEMAKULDES = BOLD + "tema"  # szintén a _worker.js: név és e-mail nélkül, csak a kérdés szövegét tárolja
 E = lambda s: html.escape(str(s), quote=True)
 TEMAK = {
