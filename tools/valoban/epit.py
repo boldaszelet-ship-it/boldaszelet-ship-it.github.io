@@ -22,19 +22,21 @@ from io import BytesIO
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
 
 GYOKER = Path(__file__).resolve().parents[2]
 ADAT = Path(__file__).with_name("videok.json")
 KERDESEK = Path(__file__).with_name("kerdesek.json")  # kézi: téma, ítélet, rövid válasz; bírálat után kerül ide
 SZOVEGEK = Path(__file__).with_name("szovegek.json")  # gyártásból: ~/Valoban/tools/web_adat.py
+CIKKEK = Path(__file__).with_name("cikkek")  # kézi: egy cikk egy .md, a jövőbeli dátumú a napján jelenik meg
 WEB = GYOKER / "valoban"
-BOLD = "https://valoban.pages.dev/"  # a GitHub-cím is él: a Google és a TikTok arra hivatkozik
+BOLD ="https://valoban.pages.dev/"  # a GitHub-cím is él: a Google és a TikTok arra hivatkozik
 CSATORNA = "UC7E2Nop5attkRyAdKO_RPlA"
 RSS = f"https://www.youtube.com/feeds/videos.xml?channel_id={CSATORNA}"
 YT = "https://www.youtube.com/@valobanhun"
 FB = "https://www.facebook.com/profile.php?id=61594155817912"
-TT = "https://www.tiktok.com/@valobanhun"
+FB_OLDAL = "1283690228171562"
+TT ="https://www.tiktok.com/@valobanhun"
 BP = ZoneInfo("Europe/Budapest")
 HONAP = "január február március április május június július augusztus szeptember október november december".split()
 UA = {"User-Agent": "Mozilla/5.0 (valoban-weboldal)"}
@@ -284,6 +286,7 @@ def lap(cim, leiras, tartalom, utvonal, elo="", kep_ut="profil.png", extra="", t
 <meta property="og:description" content="{E(leiras)}">
 <meta property="og:url" content="{BOLD}{utvonal}">
 <meta property="og:image" content="{BOLD}{kep_ut}">
+<meta property="fb:pages" content="{FB_OLDAL}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="alternate" type="application/rss+xml" title="Valóban?" href="{BOLD}feed.xml">
 <meta name="theme-color" content="#07192e">
@@ -293,7 +296,7 @@ def lap(cim, leiras, tartalom, utvonal, elo="", kep_ut="profil.png", extra="", t
 <body>
 <a class="ugras" href="#tartalom">Ugrás a tartalomra</a>
 <header class="fej"><a class="marka" href="{elo or './'}"><img src="{elo}profil.png" width="40" height="40" alt=""><span>Valóban<i>?</i></span></a>
-<nav aria-label="Fő"><a href="{elo}tevhitek.html">Tévhitek</a><a href="{elo}videok.html">Videók</a><a href="{elo}modszertan.html">Így dolgozunk</a>{f'<a href="{elo}temat-kuldj.html">Témát küldök</a>' if TEMAKULDO else ''}{f'<a href="{elo}hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}<a class="yt" href="{YT}" rel="noopener">YouTube</a></nav></header>
+<nav aria-label="Fő"><a href="{elo}cikkek.html">Cikkek</a><a href="{elo}tevhitek.html">Tévhitek</a><a href="{elo}videok.html">Videók</a><a href="{elo}modszertan.html">Így dolgozunk</a>{f'<a href="{elo}temat-kuldj.html">Témát küldök</a>' if TEMAKULDO else ''}{f'<a href="{elo}hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}<a class="yt" href="{YT}" rel="noopener">YouTube</a></nav></header>
 <main id="tartalom">
 {tartalom}
 </main>
@@ -302,7 +305,7 @@ def lap(cim, leiras, tartalom, utvonal, elo="", kep_ut="profil.png", extra="", t
 <p class="koveto"><a href="{YT}" rel="noopener">YouTube</a><a href="{TT}" rel="noopener">TikTok</a><a href="{FB}" rel="noopener">Facebook</a></p>
 <p>Üzemeltető: Boldurián Gábor, 1191 Budapest, Dobó Katica utca 13. · <a href="mailto:boldaszelet@gmail.com">boldaszelet@gmail.com</a> · Tárhely: GitHub, Inc. · Kiszolgálás: Cloudflare, Inc.</p>
 <p><a href="{elo}modszertan.html">Így dolgozunk</a> · <a href="{elo}adatvedelem.html">Adatkezelési tájékoztató</a> · Az oldal nem használ sütit és látogatómérést.</p>
-<p>A videók mesterséges intelligencia-alapú eszközökkel készülnek, a narráció szintetikus hang: <a href="{elo}modszertan.html">részletek</a>.</p>
+<p>A videók és a cikkek mesterséges intelligencia-alapú eszközökkel készülnek, a narráció szintetikus hang: <a href="{elo}modszertan.html">részletek</a>.</p>
 </div></footer>
 </body>
 </html>
@@ -315,8 +318,112 @@ def kereso(elo="", cimke="Mire vagy kíváncsi?"):
             '<button class="gomb" type="submit">Keresés</button></div></form>')
 
 
-def kezdolap(v):
-    hosszu = [x for x in v if x["tipus"] == "hosszu" and x["id"] not in BEMUTATO]
+def cikk_olvas(p):
+    """Egy cikkfájl: `kulcs: érték` fejléc, `---`, törzs. A formátum: tools/valoban/cikkek/README.md."""
+    fej, torzs = p.read_text().split("\n---\n", 1)
+    c = {"slug": p.stem, "forras": [], "torzs": [b.strip() for b in torzs.split("\n\n") if b.strip()]}
+    for sor in fej.splitlines():
+        k, e = sor.split(":", 1)
+        if k == "forras":
+            c["forras"].append([y.strip() for y in e.rsplit(" | ", 1)])
+        else:
+            c[k] = e.strip()
+    c["ts"] = int(dt.datetime.fromisoformat(c["datum"]).replace(hour=7, tzinfo=BP).timestamp())
+    c["perc"] = max(1, round(len(torzs.split()) / 200))
+    return c
+
+
+def cikkek_betolt():
+    ma = dt.datetime.now(BP).date().isoformat()
+    sor = [cikk_olvas(p) for p in CIKKEK.glob("*.md") if p.name != "README.md"]
+    # bírálat nélkül nem jelenik meg cikk, a módszertan ezt ígéri; a --minden csak helyi előnézet, élesben nem fut
+    return sorted([c for c in sor if (c["datum"] <= ma and c.get("biralat")) or "--minden" in sys.argv], key=lambda c: c["ts"], reverse=True)
+
+
+def cikk_meta(c):
+    return " · ".join((TEMAK[c["rovat"]][0], datum(c["ts"]), f"{c['perc']} perc olvasás"))
+
+
+def cikkartya(c, elo=""):
+    return (f'<li class="kartya cikkartya"><a href="{elo}cikk/{c["slug"]}.html"><img src="{elo}{c["kep"]}" alt="" loading="lazy" width="640" height="360">'
+            f'<span class="rovat">{E(TEMAK[c["rovat"]][0])}</span><span class="cim">{E(c["cim"])}</span><span class="alcim">{E(c["alcim"])}</span>'
+            f'<span class="meta">{E(datum(c["ts"]))} · {c["perc"]} perc</span></a></li>')
+
+
+def kredit(s):
+    """`Szöveg | forrás-URL | licenc-URL`: a szabad licenc linket kér, a saját kép kreditje csak szöveg."""
+    szov, *ut = [y.strip() for y in s.split(" | ")]
+    return E(szov) + "".join(f' · <a href="{E(u)}" rel="noopener nofollow">{n}</a>' for n, u in zip(("forrás", "licenc"), ut))
+
+
+def blokk(b, elo):
+    if b.startswith("## "):
+        return f"<h2>{E(b[3:])}</h2>"
+    if b.startswith("> "):
+        return f"<blockquote>{E(b[2:])}</blockquote>"
+    k = re.fullmatch(r"!\[(.*?) \| (.*)\]\((.*?)\)", b)
+    if k:
+        return f'<figure><img src="{elo}{E(k[3])}" alt="{E(k[1])}" loading="lazy"><figcaption>{E(k[1])} <span>{kredit(k[2])}</span></figcaption></figure>'
+    return f"<p>{E(b)}</p>"
+
+
+def megosztas(c):
+    u = f"{BOLD}cikk/{c['slug']}.html"
+    fb = "https://www.facebook.com/sharer/sharer.php?u=" + urllib.parse.quote(u, safe="")
+    return (f'<p class="megoszt"><a class="gomb" href="{fb}" rel="noopener" target="_blank">Megosztom a Facebookon</a>'
+            f'<button class="gomb masod" type="button" data-link="{u}">Link másolása</button></p>')
+
+
+MASOLO = """<script>document.querySelectorAll('[data-link]').forEach(function(g){g.addEventListener('click',function(){navigator.clipboard.writeText(g.dataset.link).then(function(){g.textContent='Link kimásolva'})})})</script>"""
+
+
+def cikklap(c, tobbi, videok):
+    x = videok.get(c.get("video"))
+    tema = c["rovat"]
+    mm = f'<a href="../">Valóban?</a> › <a href="../cikkek.html">Cikkek</a> › <a href="../tema/{tema}.html">{E(TEMAK[tema][0])}</a>'
+    vid = f"""<a class="cikk-video" href="../v/{x['slug']}.html"><img src="../k/{x['id']}.jpg" alt="" width="240" height="135" loading="lazy"><span><b>Videón is megnézheted</b>{E(tiszta_cim(x['cim']))}</span></a>""" if x else ""
+    src = "".join(f'<li><a href="{E(u)}" rel="noopener nofollow">{E(n)}</a></li>' for n, u in c["forras"])
+    kel = dt.datetime.fromtimestamp(c["ts"], BP)
+    targy = f"Hiba: {c['cim']}"
+    szabad = "creativecommons.org" in c["kepkredit"] + "".join(c["torzs"])
+    t = f"""<article class="cikk">
+<header class="cikk-fej"><nav class="morzsa" aria-label="Morzsamenü">{mm}</nav>
+<h1>{E(c['cim'])}</h1><p class="cikk-lead">{E(c['alcim'])}</p>
+<p class="meta">Valóban? · <time datetime="{kel.date().isoformat()}">{E(datum(c['ts']))}</time> · {c['perc']} perc olvasás · <a href="../modszertan.html">mesterséges intelligencia-alapú eszközökkel készült</a></p></header>
+<figure class="cikk-kep"><img src="../{E(c['kep'])}" alt="{E(c['kepalairas'])}" fetchpriority="high"><figcaption>{E(c['kepalairas'])} <span>{kredit(c['kepkredit'])}</span></figcaption></figure>
+<div class="cikk-torzs">
+{''.join(blokk(b, '../') for b in c['torzs'])}
+{megosztas(c)}
+{vid}
+<h2>Források</h2><ol class="forrasok">{src}</ol>
+<p class="ellenorzes">A cikk {'a videó állítástáblájára épül, és külön tény-, nyelvi és jogi bírálaton ment át' if x else 'külön tény-, nyelvi és jogi bírálaton ment át'}.{' A kivágott képek az eredeti licencük alatt használhatók tovább.' if szabad else ''} <a href="../modszertan.html">Hogyan ellenőrzünk?</a></p>
+<p class="hiba">Hibát találtál? <a href="mailto:boldaszelet@gmail.com?subject={urllib.parse.quote(targy)}">Írd meg nekünk</a>, megnézzük.</p>
+</div></article>
+{f'<section><div class="sor"><h2>Olvasd tovább</h2><a href="../cikkek.html">Összes cikk</a></div><ul class="racs">{"".join(cikkartya(y, "../") for y in tobbi)}</ul></section>' if tobbi else ''}
+{MASOLO}"""
+    ld = jsonld({"@context": "https://schema.org", "@type": "Article", "headline": c["cim"][:110], "description": c["leiras"], "inLanguage": "hu",
+                 "image": f"{BOLD}o/c-{c['slug']}.jpg", "datePublished": kel.isoformat(), "author": KIADO, "publisher": KIADO, "articleSection": TEMAK[tema][0],
+                 "mainEntityOfPage": f"{BOLD}cikk/{c['slug']}.html", "citation": [u for _, u in c["forras"]][:30]})
+    ld += morzsa(("Valóban?", ""), ("Cikkek", "cikkek.html"), (c["cim"], f"cikk/{c['slug']}.html"))
+    ld += (f'\n<meta property="article:published_time" content="{kel.isoformat()}">\n<meta property="article:section" content="{E(TEMAK[tema][0])}">')
+    return lap(f"{c['cim']} – Valóban?" if len(c["cim"]) <= 60 else c["cim"], c["leiras"], t, f"cikk/{c['slug']}.html", "../", f"o/c-{c['slug']}.jpg", ld, "article")
+
+
+def cikkcimlap(cikkek):
+    bev = "Hosszú olvasmányok a Valóban? ellenőrzött anyagaiból: történelem, bűnügyek és Magyarország, forrásokkal."
+    fo, *tobbi = cikkek
+    t = f"""<section class="archiv"><h1>Cikkek</h1><p class="lede">{E(bev)}</p></section>
+<section><a class="cimlapsztori" href="cikk/{fo['slug']}.html"><img src="{fo['kep']}" alt="" fetchpriority="high"><span class="cs-sz"><span class="rovat">{E(TEMAK[fo['rovat']][0])}</span><b>{E(fo['cim'])}</b><span class="alcim">{E(fo['alcim'])}</span><span class="meta">{E(datum(fo['ts']))} · {fo['perc']} perc</span></span></a></section>
+{f'<section><h2 class="alatt">Még több cikk</h2><ul class="racs">{"".join(cikkartya(c) for c in tobbi)}</ul></section>' if tobbi else ''}"""
+    return lap("Cikkek – Valóban?", bev, t, "cikkek.html", kep_ut=f"o/c-{fo['slug']}.jpg")
+
+
+def cikkblokk(cikkek, elo="", cimke="Friss cikkek"):
+    return f'<section><div class="sor"><h2>{cimke}</h2><a href="{elo}cikkek.html">Összes</a></div><ul class="racs">{"".join(cikkartya(c, elo) for c in cikkek[:3])}</ul></section>' if cikkek else ""
+
+
+def kezdolap(v, cikkek):
+    hosszu =[x for x in v if x["tipus"] == "hosszu" and x["id"] not in BEMUTATO]
     shorts = [x for x in v if x["tipus"] == "shorts"]
     fo = next((x for x in v if x["id"] in BEMUTATO), hosszu[0])
     ellenorzott = [x for x in v if x.get("itelet")]
@@ -333,7 +440,7 @@ def kezdolap(v):
 <a class="kiemelt" href="v/{fo['slug']}.html"><img src="k/{fo['id']}.jpg" width="640" height="360" alt="" fetchpriority="high"><span class="cimke">Kezdd itt</span><span class="cim">{E(tiszta_cim(fo['cim']))}</span></a>
 </section>
 <section class="szamok" aria-label="Számokban"><dl><div><dt>videó</dt><dd>{len(v)}</dd></div><div><dt>különböző forrás</dt><dd>{forras}</dd></div><div><dt>forrásra visszavezetett állítás</dt><dd>{allitas}</dd></div></dl></section>
-<section><div class="sor"><h2>Legutóbb ellenőriztük</h2><a href="tevhitek.html">Az összes</a></div>
+{cikkblokk(cikkek)}<section><div class="sor"><h2>Legutóbb ellenőriztük</h2><a href="tevhitek.html">Az összes</a></div>
 <ul class="valaszok">{''.join(valaszsor(x) for x in ellenorzott[:6])}</ul></section>
 <section><h2 class="alatt">Témák</h2><ul class="temak">{temak}</ul></section>
 <section><div class="sor"><h2>Hosszú részek</h2><a href="videok.html#hosszu">Összes</a></div>
@@ -442,7 +549,7 @@ def iso(ts):
     return dt.datetime.fromtimestamp(ts, BP).isoformat()
 
 
-def videolap(x, tobbi, par=None):
+def videolap(x, tobbi, par=None, cikk=None):
     bek, forras, kredit, gep = bont(x["leiras"])
     cim = tiszta_cim(x["cim"])
     allo = x["tipus"] == "shorts"
@@ -468,7 +575,7 @@ def videolap(x, tobbi, par=None):
 <div class="vid-sz"><p class="meta">{E(meta)}</p><h1>{E(cim)}</h1>
 <div class="rovid">{csip(x)}<p><b>Röviden:</b> {E(valasz)}</p></div>
 {szov}
-<p class="gombok">{f'<a class="gomb" href="{par["slug"]}.html">A teljes rész</a>' if par else ''}<a class="gomb{' masod' if par else ''}" href="{YT}?sub_confirmation=1" rel="noopener">Feliratkozom</a>{'<a class="gomb masod" href="../hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}</p>
+<p class="gombok">{f'<a class="gomb" href="{par["slug"]}.html">A teljes rész</a>' if par else ''}{f'<a class="gomb masod" href="../cikk/{cikk["slug"]}.html">Elolvasom cikkben</a>' if cikk else ''}<a class="gomb{' masod' if par else ''}" href="{YT}?sub_confirmation=1" rel="noopener">Feliratkozom</a>{'<a class="gomb masod" href="../hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}</p>
 {'<h2>A rész teljes szövege</h2>' + ''.join(f'<p>{E(p)}</p>' for p in atirat) if atirat else ''}
 {f'<h2>Források</h2><ol class="forrasok">{src}</ol>' if src else ''}
 {f'<p class="ellenorzes">{E(ell)} · <a href="../modszertan.html">Hogyan ellenőrzünk?</a></p>' if ell else ''}
@@ -498,13 +605,13 @@ def atiranyit(x):
             f'<a href="{c}">Tovább</a></html>\n')
 
 
-def temalap(k, v):
+def temalap(k, v, cikkek):
     nev, bev = TEMAK[k]
     sor = [x for x in v if x.get("tema") == k]
     ell = [x for x in sor if x.get("itelet")]
     t = f"""<section class="archiv"><nav class="morzsa" aria-label="Morzsamenü"><a href="../">Valóban?</a> › <span aria-current="page">{E(nev)}</span></nav>
 <h1>{E(nev)}</h1><p class="lede">{E(bev)}</p></section>
-{f'<section><h2 class="alatt">Ellenőrzött állítások</h2><ul class="valaszok">{"".join(valaszsor(x, "../") for x in ell)}</ul></section>' if ell else ''}
+{cikkblokk([c for c in cikkek if c["rovat"] == k], "../", "Cikkek")}{f'<section><h2 class="alatt">Ellenőrzött állítások</h2><ul class="valaszok">{"".join(valaszsor(x, "../") for x in ell)}</ul></section>' if ell else ''}
 <section><h2 class="alatt">Minden videó</h2><ul class="racs vegyes">{''.join(kartya(x, '../') for x in sor)}</ul></section>"""
     ld = morzsa(("Valóban?", ""), (nev, f"tema/{k}.html"))
     return lap(f"{nev} – Valóban?", bev, t, f"tema/{k}.html", "../", extra=ld)
@@ -544,6 +651,8 @@ def modszertan():
 <li>A kép és a hang technikailag hibátlan, a képkockákat megnéztük, a hangot megmértük.</li>
 <li>A cím, a leírás és a felirat átment a nyelvi ellenőrzésen.</li>
 <li>A felhasznált képek licence rendben van, a kreditek a leírásban szerepelnek.</li></ul>
+<h2>Cikkek</h2>
+<p>A cikkek a videók állítástáblájára épülnek. Minden cikk saját tény-, nyelvi és jogi bírálaton megy át, és bírálat nélkül nem jelenhet meg. Ahol a cikk többet vagy mást mond, mint a videó, azt ez a bírálat ellenőrzi a forrásokon. A forrásokat a cikk végén felsoroljuk.</p>
 <h2>Kiadás után</h2>
 <p>Mérjük, mit néznek és mit kérdeznek a nézők, és ez alakítja a következő témákat.{' <a href="temat-kuldj.html">Te is küldhetsz témát.</a>' if TEMAKULDO else ''}</p>
 <h2>Hibát találtál?</h2>
@@ -573,18 +682,21 @@ def temalapok():
     }
 
 
-def csatorna(v):
-    tetel = "".join(f"<item><title>{E(tiszta_cim(x['cim']))}</title><link>{BOLD}v/{x['slug']}.html</link><guid>{BOLD}v/{x['slug']}.html</guid>"
-                    f"<pubDate>{dt.datetime.fromtimestamp(x['ts'], dt.timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')}</pubDate><description>{E(rovid(x))}</description></item>\n"
-                    for x in v[:30])
+def csatorna(v, cikkek):
+    sor = [(x["ts"], tiszta_cim(x["cim"]), f"v/{x['slug']}.html", rovid(x)) for x in v] + [(c["ts"], c["cim"], f"cikk/{c['slug']}.html", c["alcim"]) for c in cikkek]
+    tetel = "".join(f"<item><title>{E(c)}</title><link>{BOLD}{u}</link><guid>{BOLD}{u}</guid>"
+                    f"<pubDate>{dt.datetime.fromtimestamp(ts, dt.timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')}</pubDate><description>{E(d)}</description></item>\n"
+                    for ts, c, u, d in sorted(sor, reverse=True)[:30])
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>Valóban?</title>'
             f"<link>{BOLD}</link><description>Magyar ismeretterjesztő csatorna: ismert állítások, forrásokkal.</description><language>hu</language>\n{tetel}</channel></rss>\n")
 
 
-def llms(v):
+def llms(v, cikkek):
     sor = "\n".join(f"- [{tiszta_cim(x['cim'])}]({BOLD}v/{x['slug']}.html): {rovid(x)}" for x in v if x.get("itelet"))
+    cs = "\n".join(f"- [{c['cim']}]({BOLD}cikk/{c['slug']}.html): {c['alcim']}" for c in cikkek)
     return (f"# Valóban?\n\n> Magyar ismeretterjesztő csatorna. Elterjedt állításokat ellenőrzünk, nyilvános forrásokkal.\n\n"
-            f"- [Így dolgozunk]({BOLD}modszertan.html)\n- [Minden videó]({BOLD}videok.html)\n\n## Ellenőrzött állítások\n\n{sor}\n")
+            f"- [Így dolgozunk]({BOLD}modszertan.html)\n- [Minden videó]({BOLD}videok.html)\n- [Minden cikk]({BOLD}cikkek.html)\n\n"
+            + (f"## Cikkek\n\n{cs}\n\n" if cs else "") + f"## Ellenőrzött állítások\n\n{sor}\n")
 
 
 def megosztokep(x):
@@ -602,6 +714,13 @@ def megosztokep(x):
         kozep = k.resize((int(w * 630 / h), 630), Image.LANCZOS)
         hatter.paste(kozep, ((1200 - kozep.width) // 2, 0))
     hatter.save(cel, quality=78, optimize=True, progressive=True)
+
+
+def cikk_megosztokep(c):
+    """1200×630: a Facebook ezt a képet mutatja a cikk linkje mellett."""
+    cel = WEB / "o" / f"c-{c['slug']}.jpg"
+    if not cel.exists():
+        ImageOps.fit(Image.open(WEB / c["kep"]).convert("RGB"), (1200, 630), Image.LANCZOS).save(cel, quality=80, optimize=True, progressive=True)
 
 
 def slugosit(cim, foglalt):
@@ -633,12 +752,14 @@ def gazdagit(videok):
     return ki
 
 
-def terkep(v):
+def terkep(v, cikkek):
     nap = lambda ts: dt.datetime.fromtimestamp(ts, BP).date().isoformat()
     u = [(BOLD, nap(v[0]["ts"])), (BOLD + "videok.html", nap(v[0]["ts"])), (BOLD + "tevhitek.html", nap(v[0]["ts"])), (BOLD + "modszertan.html", None),
          (BOLD + "adatvedelem.html", None)] + ([(BOLD + "temat-kuldj.html", None)] if TEMAKULDO else []) + ([(BOLD + "hirlevel.html", None)] if HIRLEVEL else [])
     u += [(f"{BOLD}tema/{k}.html", nap(v[0]["ts"])) for k in TEMAK]
     u += [(f"{BOLD}v/{x['slug']}.html", x.get("ellenorizve") or nap(x["ts"])) for x in v if not vekony(x)]
+    if cikkek:
+        u += [(BOLD + "cikkek.html", cikkek[0]["datum"])] + [(f"{BOLD}cikk/{c['slug']}.html", c["datum"]) for c in cikkek]
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             + "".join(f"<url><loc>{E(a)}</loc>{f'<lastmod>{d}</lastmod>' if d else ''}</url>\n" for a, d in u) + "</urlset>\n")
 
@@ -664,13 +785,25 @@ def main():
     for f in (WEB / "v").glob("*.html"):
         if f.name not in elo:
             f.unlink()
+    cikkek = cikkek_betolt()
+    videocikk = {c.get("video"): c for c in cikkek}
     for n, v in enumerate(lathato):
         rokon = lathato[n + 1:] + lathato[:n]
         jo = [x for x in rokon if x["tipus"] == v["tipus"] and x["id"] not in BEMUTATO]
         tobbi = ([x for x in jo if x.get("tema") == v.get("tema")] + [x for x in jo if x.get("tema") != v.get("tema")])[:6]
-        (WEB / "v" / f"{v['slug']}.html").write_text(videolap(v, tobbi, par.get(v["id"])))
+        (WEB / "v" / f"{v['slug']}.html").write_text(videolap(v, tobbi, par.get(v["id"]), videocikk.get(v["id"])))
         (WEB / "v" / f"{v['id']}.html").write_text(atiranyit(v))
-    (WEB / "index.html").write_text(kezdolap(lathato))
+    (WEB / "cikk").mkdir(exist_ok=True)
+    for f in (WEB / "cikk").glob("*.html"):
+        if f.stem not in {c["slug"] for c in cikkek}:
+            f.unlink()
+    idbol = {v["id"]: v for v in lathato}
+    for n, c in enumerate(cikkek):
+        cikk_megosztokep(c)
+        (WEB / "cikk" / f"{c['slug']}.html").write_text(cikklap(c, (cikkek[n + 1:] + cikkek[:n])[:3], idbol))
+    if cikkek:
+        (WEB / "cikkek.html").write_text(cikkcimlap(cikkek))
+    (WEB / "index.html").write_text(kezdolap(lathato, cikkek))
     (WEB / "videok.html").write_text(archivum(lathato))
     (WEB / "tevhitek.html").write_text(tevhitek(lathato))
     (WEB / "modszertan.html").write_text(modszertan())
@@ -678,14 +811,14 @@ def main():
         for nev, tartalom in temalapok().items():
             (WEB / nev).write_text(tartalom)
     for k in TEMAK:
-        (WEB / "tema" / f"{k}.html").write_text(temalap(k, lathato))
-    (WEB / "sitemap.xml").write_text(terkep(lathato))
-    (WEB / "feed.xml").write_text(csatorna(lathato))
-    (WEB / "llms.txt").write_text(llms(lathato))
+        (WEB / "tema" / f"{k}.html").write_text(temalap(k, lathato, cikkek))
+    (WEB / "sitemap.xml").write_text(terkep(lathato, cikkek))
+    (WEB / "feed.xml").write_text(csatorna(lathato, cikkek))
+    (WEB / "llms.txt").write_text(llms(lathato, cikkek))
     if HIRLEVEL:
         for nev, tartalom in hirlevel_lapok().items():
             (WEB / nev).write_text(tartalom)
-    print(f"{len(lathato)} videó, {len(videok) - len(lathato)} rejtett")
+    print(f"{len(lathato)} videó, {len(videok) - len(lathato)} rejtett, {len(cikkek)} cikk")
 
 
 if __name__ == "__main__":
