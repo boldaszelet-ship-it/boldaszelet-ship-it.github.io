@@ -1,7 +1,7 @@
 cim: Miért őrizte Amerika 32 évig a magyar Szent Koronát?
 alcim: 1945 nyarán az amerikaiak kinyitották a magyar koronázási ládát, és csak egy kardot találtak benne. A korona útja egy benzineshordótól Fort Knoxon át a Parlamentig vezetett.
 leiras: Egy ládában kard, egy hordóban a korona. Miért maradt a magyar Szent Korona 32 évig amerikai őrizetben, és hogyan jutott haza 1978-ban?
-datum: 2026-11-02
+datum: 2026-11-01
 rovat: tortenelem
 video: 6typ5jL34gQ
 kep: c/amerika-szent-korona-32-ev-1.jpg

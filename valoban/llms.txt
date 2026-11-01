@@ -8,9 +8,6 @@
 
 ## Cikkek
 
-- [Mi folyik Budapest alatt? Egy barlang, amit ma is csak búvárok járnak](https://valoban.pages.dev/cikk/mi-folyik-budapest-alatt-molnar-janos-barlang.html): A budai barlangokat nem egyszerűen a felszínről érkező víz oldotta ki: a mélyből feláramló meleg víz kellett hozzá. A Molnár János-barlangban ez a munka ma is zajlik.
-- [Magyarország, 1946: mennyit ért a fizetésed, mire hazaértél vele?](https://valoban.pages.dev/cikk/magyarorszag-1946-mennyit-ert-a-fizetes.html): Egy nemzetközi táblázat szerint 1946 júliusában 15 óránként duplázódtak az árak, egy 2022-es magyar újraszámítás szerint viszont az infláció nagyságrendekkel kisebb volt. A fizetés sorsa két pénzen és egy éjszakán múlt.
-- [Hét festmény, egy éjszaka: ki rabolta ki a Szépművészetit 1983-ban?](https://valoban.pages.dev/cikk/het-festmeny-egy-ejszaka-szepmuveszeti-1983.html): A Szépművészeti 1983-as kirablását az évszázad magyarországi bűntényének nevezték. A tetteseket elítélték, a képek hazatértek, a megbízó kilétét viszont nem bizonyították.
 - [Miért őrizte Amerika 32 évig a magyar Szent Koronát?](https://valoban.pages.dev/cikk/amerika-szent-korona-32-ev.html): 1945 nyarán az amerikaiak kinyitották a magyar koronázási ládát, és csak egy kardot találtak benne. A korona útja egy benzineshordótól Fort Knoxon át a Parlamentig vezetett.
 
 ## Ellenőrzött állítások
