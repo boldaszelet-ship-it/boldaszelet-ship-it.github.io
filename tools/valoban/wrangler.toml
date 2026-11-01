@@ -1,0 +1,9 @@
+# valoban.pages.dev: innen fut a telepítés, hogy a TEMAK-kötés a kóddal együtt éljen.
+# cd tools/valoban && npx wrangler@4.60.0 pages deploy --branch main
+name = "valoban"
+pages_build_output_dir = "pages"
+compatibility_date = "2026-10-01"
+
+[[kv_namespaces]]
+binding = "TEMAK"
+id = "c9f1011c8a8a45a698f4d08426376937"

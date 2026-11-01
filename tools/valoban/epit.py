@@ -43,7 +43,7 @@ NS = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/sche
 BEMUTATO = {"AYiHXjghiBo"}  # a csatornabemutató 16:9, nem rész
 HIRLEVEL = False  # D-valoban-20261031-07: csak a Brevo-fiók és a tájékoztató élesítése után kapcsolható be
 FELIRATKOZAS = BOLD + "feliratkozas"  # a pages/_worker.js fogadja, ezért a látogató böngészőjébe nem kerül harmadik fél
-TEMAKULDO = False  # D-valoban-20261101-04: csak a tájékoztató, a KV-kötés és a Worker élesítése után kapcsolható be
+TEMAKULDO = True  # D-valoban-20261101-04: a TEMAK KV-t a wrangler.toml köti a Workerhez
 TEMAKULDES = BOLD + "tema"  # szintén a _worker.js: név és e-mail nélkül, csak a kérdés szövegét tárolja
 E = lambda s: html.escape(str(s), quote=True)
 TEMAK = {
