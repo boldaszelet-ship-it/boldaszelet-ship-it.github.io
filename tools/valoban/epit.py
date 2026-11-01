@@ -43,7 +43,7 @@ NS = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/sche
       "m": "http://search.yahoo.com/mrss/"}
 BEMUTATO = {"AYiHXjghiBo"}  # a csatornabemutató 16:9, nem rész
 HIRLEVEL = False  # D-valoban-20261031-07: csak a Brevo-fiók és a tájékoztató élesítése után kapcsolható be
-LEJATSZO = False  # D-valoban-20261101-05: a YouTube-lejátszó harmadik fél, csak a tájékoztató módosítása után kapcsolható be
+LEJATSZO = False  # D-valoban-20261101-08: a YouTube-lejátszó harmadik fél, csak a tájékoztató módosítása után kapcsolható be
 FELIRATKOZAS = BOLD + "feliratkozas"  # a pages/_worker.js fogadja, ezért a látogató böngészőjébe nem kerül harmadik fél
 E = lambda s: html.escape(str(s), quote=True)
 TEMAK = {
@@ -438,7 +438,7 @@ def pengolap(v):
 <div class="o-sav"><p>Magyarország, 1946, Danyi átlaga szerint (kb. 34 óra): <b id="o-da"></b></p><span class="r-jel" id="o-daj"></span></div>
 <div class="o-sav"><p>Zimbabwe, 2008 (becslés, 24,7 óra): <b id="o-zw"></b></p><span class="r-jel masik" id="o-zwj"></span></div>
 <noscript><p>A csúszkához JavaScript kell.</p></noscript>
-<p class="meta">Danyi szerint július közepére a pengős bankjegyekért már szinte semmit sem lehetett venni, a hónap második felében a pengő zuhanása már csak papíron számított. Az állami fizetések ekkor már adópengőben jártak.</p>
+<p class="meta">Danyi szerint július közepére a pengős bankjegyekért már szinte semmit sem lehetett venni, a hónap második felében a pengő zuhanása már csak papíron számított.</p>
 {f'<h2>A teljes történet</h2><p>{videolink(resz)}</p>' if resz else ''}
 <h2>Források</h2>{forraslista(fo)}</section>
 <script src="magyarazo.js" defer></script>"""
