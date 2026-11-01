@@ -150,5 +150,68 @@ main>section.szamok{margin-top:clamp(36px,5vw,56px)}
 .archiv .lede{margin-top:14px}
 .temalink{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.95rem;margin-bottom:16px!important}
 .temalink a{color:var(--szoveg)}
-@media (max-width:820px){.fej{flex-wrap:wrap;gap:4px 16px}.fej nav{width:100%;overflow-x:auto}.fej nav a:nth-child(2){display:inline}.fej nav a{white-space:nowrap}}
+.kviz-lista{margin-top:22px}
+.kviz-lista summary{cursor:pointer;font-weight:700;color:var(--feher);padding-block:8px}
+.proba{font-weight:700}
+.napi [data-kviz=nap]{max-width:44em}
+.kviz-kerdes{background:var(--panel);border-radius:12px;padding:clamp(18px,3vw,28px)}
+.kviz-allitas{color:var(--feher);font-weight:800;font-size:clamp(1.25rem,2.6vw,1.7rem);line-height:1.25;margin:0 0 18px}
+.kviz-gombok{display:flex;flex-wrap:wrap;gap:10px}
+.kviz-gombok .gomb{font:inherit;font-weight:700;cursor:pointer}
+.kviz-gombok .gomb:disabled{cursor:default;opacity:.55}
+.kviz-gombok .gomb.valasztott{opacity:1;border-color:var(--sarga);color:var(--sarga);background:none}
+.kviz-valasz{margin-top:18px;padding-top:16px;border-top:1px solid var(--vonal)}
+.kviz-valasz:focus{outline:none}
+.kviz-valasz p{margin:0 0 12px}
+.kviz-valasz .gomb{display:inline-block;font:inherit;font-weight:800;cursor:pointer}
+.kviz-fej{color:var(--feher);font-weight:800;font-size:1.12rem}
+.kviz{max-width:calc(44em + 2*var(--gutter))}
+.kviz .meta{margin-top:18px;margin-bottom:10px}
+.kviz-jegy{margin-top:26px!important}
+.kviz-kihivas{background:var(--sarga);color:var(--mely);font-weight:800;border-radius:8px;padding:10px 16px;margin:18px 0 0}
+.kviz-eredmeny{background:var(--panel);border-radius:12px;padding:clamp(18px,3vw,28px)}
+.kviz-eredmeny:focus{outline:none}
+.kviz-eredmeny p{margin:0 0 10px}
+.kviz-eredmeny .gomb{font:inherit;font-weight:800;cursor:pointer}
+.kviz-pont{color:var(--sarga);font-weight:900;font-size:clamp(2.6rem,7vw,4rem);line-height:1}
+.kviz-racs{letter-spacing:2px;word-break:break-all}
+.probald .meta{color:var(--szoveg)}
+.magyarazo h3{color:var(--feher);font-size:1.02rem;margin:18px 0 6px}
+.magyarazo .fulek{margin-top:22px}
+.r-valaszto{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0 0}
+.r-valaszto label{display:block;font-weight:700;color:var(--feher)}
+.r-valaszto select{display:block;width:100%;margin-top:6px;font:inherit;color:var(--feher);background:var(--panel);border:2px solid var(--vonal);border-radius:8px;padding:10px 12px}
+.r-mondat{color:var(--feher);font-weight:800;font-size:clamp(1.25rem,2.8vw,1.7rem);line-height:1.25;margin:24px 0 18px!important}
+.r-rajz{display:grid;gap:16px;margin-bottom:16px}
+.r-sor p{margin:0 0 6px!important;font-size:.95rem}
+.r-jel{display:block;min-width:2px;min-height:14px;background:var(--sarga);border-radius:2px}
+.r-jel.masik{background:#5fd38d}
+.r-lista{margin:0}
+.r-lista li{margin:6px 0}
+.p-cimke{display:block;color:var(--feher);font-weight:700;margin:22px 0 6px}
+.p-sor{display:flex;flex-wrap:wrap;gap:10px}
+.p-sor input{flex:1 1 180px;min-width:0;font:inherit;font-size:1.1rem;color:var(--feher);background:var(--panel);border:2px solid var(--vonal);border-radius:8px;padding:11px 14px}
+.p-sor .gomb{font:inherit;font-weight:700;cursor:pointer;padding-inline:16px}
+.p-ki{background:var(--panel);border-radius:12px;padding:clamp(18px,3vw,26px);margin:18px 0 16px}
+.p-ki p:last-child{margin-bottom:0}
+.p-nagy{color:var(--sarga);font-weight:900;font-size:clamp(1.15rem,3vw,1.7rem);line-height:1.2;margin-bottom:6px!important;font-variant-numeric:tabular-nums}
+.p-ki b{color:var(--feher)}
+.o-csuszka{display:block;width:100%;accent-color:var(--sarga);margin:4px 0 18px}
+.o-sav{margin-bottom:14px}
+.o-sav p{margin:0 0 6px!important}
+.sorrend{display:grid;gap:1px;background:var(--vonal);border-block:1px solid var(--vonal);counter-reset:s}
+.sorrend li{counter-increment:s;background:var(--mely)}
+.sorrend a{display:grid;grid-template-columns:2.2em 96px minmax(0,1fr) auto;gap:14px;align-items:center;padding:12px 0;text-decoration:none;color:var(--feher)}
+.sorrend a::before{content:counter(s);color:var(--sarga);font-weight:900;font-size:1.3rem;text-align:right}
+.sorrend img{width:96px;height:96px;object-fit:cover;border-radius:6px}
+.sorrend .cim{font-weight:700;line-height:1.3}
+.sorrend a:hover .cim{color:var(--sarga)}
+.sorozat-sav{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;background:var(--panel);border-radius:10px;padding:14px 18px;margin:0 0 18px}
+.sorozat-sav p{margin:0}
+.sorozat-sav b{color:var(--feher)}
+.sorozat-sav a{text-decoration:none}
+.sorozat-gomb{display:flex;align-items:center;gap:16px}
+.sorozat-gomb .gomb{padding:9px 16px}
+@media (max-width:520px){.sorrend a{grid-template-columns:1.8em 64px minmax(0,1fr)}.sorrend img{width:64px;height:64px}.sorrend .itelet{grid-column:3}}
+@media (max-width:820px){.fej{flex-wrap:wrap;gap:4px 16px}.fej nav{width:100%;overflow-x:auto}.fej nav a:nth-child(2){display:inline}.fej nav a{white-space:nowrap;padding-block:12px}}
 @media (max-width:520px){.szamok dt{font-size:.8rem}.kereso .gomb{padding-inline:16px}.hos .gombok .gomb{padding-inline:16px;font-size:.95rem}.fogalmak{grid-template-columns:minmax(0,1fr)}.fogalmak dd{margin-bottom:8px}}

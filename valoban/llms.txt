@@ -4,6 +4,10 @@
 
 - [Így dolgozunk](https://valoban.pages.dev/modszertan.html)
 - [Minden videó](https://valoban.pages.dev/videok.html)
+- [Sorozatok](https://valoban.pages.dev/sorozatok.html)
+- [Igaz vagy hamis? kvíz](https://valoban.pages.dev/kviz.html)
+- [Pengő-kalkulátor](https://valoban.pages.dev/pengo.html)
+- [Rangsor-összehasonlító](https://valoban.pages.dev/rangsor.html)
 
 ## Ellenőrzött állítások
 

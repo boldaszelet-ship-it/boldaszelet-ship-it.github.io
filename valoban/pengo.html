@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pengő-kalkulátor: mennyi egy forint pengőben? – Valóban?</title>
+<meta name="description" content="Egy forint 200 millió adópengőt, vagyis 4 × 10²⁹ pengőt ért. Írj be egy összeget, és nézd meg, mennyi lett volna belőle pengőben.">
+<link rel="canonical" href="https://valoban.pages.dev/pengo.html">
+<link rel="icon" href="profil.png">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="hu_HU">
+<meta property="og:site_name" content="Valóban?">
+<meta property="og:title" content="Pengő-kalkulátor: mennyi egy forint pengőben? – Valóban?">
+<meta property="og:description" content="Egy forint 200 millió adópengőt, vagyis 4 × 10²⁹ pengőt ért. Írj be egy összeget, és nézd meg, mennyi lett volna belőle pengőben.">
+<meta property="og:url" content="https://valoban.pages.dev/pengo.html">
+<meta property="og:image" content="https://valoban.pages.dev/profil.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" type="application/rss+xml" title="Valóban?" href="https://valoban.pages.dev/feed.xml">
+<meta name="theme-color" content="#07192e">
+<link rel="preload" href="f/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="s.css">
+</head>
+<body>
+<a class="ugras" href="#tartalom">Ugrás a tartalomra</a>
+<header class="fej"><a class="marka" href="./"><img src="profil.png" width="40" height="40" alt=""><span>Valóban<i>?</i></span></a>
+<nav aria-label="Fő"><a href="kviz.html">Kvíz</a><a href="tevhitek.html">Tévhitek</a><a href="videok.html">Videók</a><a href="sorozatok.html">Sorozatok</a><a href="modszertan.html">Így dolgozunk</a><a class="yt" href="https://www.youtube.com/@valobanhun" rel="noopener">YouTube</a></nav></header>
+<main id="tartalom">
+<section class="szoveg magyarazo" id="pengo"><h1>Pengő-kalkulátor</h1><p class="lede">Egy forint 200 millió adópengőt, vagyis 4 × 10²⁹ pengőt ért. Írj be egy összeget, és nézd meg, mennyi lett volna belőle pengőben.</p>
+<label class="p-cimke" for="p-ft">Összeg forintban</label>
+<div class="p-sor"><input id="p-ft" type="text" inputmode="numeric" autocomplete="off" value="1000" maxlength="15"><button class="gomb masod" type="button" data-ft="1">1 Ft</button><button class="gomb masod" type="button" data-ft="1000">1000 Ft</button><button class="gomb masod" type="button" data-ft="1000000">1 millió Ft</button></div>
+<div id="p-ki" class="p-ki" aria-live="polite">
+<p class="p-nagy"><span id="p-penz"></span> pengő</p>
+<p class="meta"><span id="p-jegy"></span> számjegy</p>
+<p><b><span id="p-ap"></span> adópengő</b></p>
+<p><b><span id="p-db"></span> darab</b> kellene az utolsó forgalomba került bankjegyből, a százmillió bilpengősből (10²⁰ pengő).</p>
+</div>
+<noscript><p>A kalkulátorhoz JavaScript kell. Az átváltás: 1 forint = 200 millió adópengő = 4 × 10²⁹ pengő.</p></noscript>
+<p class="meta">Ez a forint bevezetésekor rögzített hivatalos átváltás, nem vásárlóerő: nem azt mutatja, hogy mit lehetett venni a pénzből. Legfeljebb 12 jegyű, egész forintösszeget számolunk.</p>
+</section>
+<section class="szoveg magyarazo" id="olvadas"><h2>Mennyit ért a fizetésed néhány óra múlva?</h2>
+<p>Egy 2012-es nemzetközi táblázat szerint 1946 júliusában 15 óránként duplázódtak az árak. Ez a szám vitatott: Danyi Pál 2022-es újraszámítása szerint a júliusi átlagos infláció 4,39 × 10⁸% volt a táblázat 4,19 × 10¹⁶%-ával szemben. Ez a havi átlag nagyjából 34 órás duplázódásnak felel meg (saját számításunk). Ugyanez a táblázat a 2008-as zimbabwei csúcsra 24,7 órát becsül.</p>
+<p>Húzd a csúszkát: ennyi maradt volna a pénzed vásárlóerejéből, ha az adott tempó egyenletesen tartott volna.</p>
+<label class="p-cimke" for="o-ora"><span id="o-felirat">0 óra múlva</span></label>
+<input id="o-ora" class="o-csuszka" type="range" min="0" max="72" step="1" value="24">
+<div class="o-sav"><p>Magyarország, 1946, a 2012-es táblázat szerint (15 óra, vitatott): <b id="o-hu"></b></p><span class="r-jel" id="o-huj"></span></div>
+<div class="o-sav"><p>Magyarország, 1946, Danyi átlaga szerint (kb. 34 óra): <b id="o-da"></b></p><span class="r-jel" id="o-daj"></span></div>
+<div class="o-sav"><p>Zimbabwe, 2008 (becslés, 24,7 óra): <b id="o-zw"></b></p><span class="r-jel masik" id="o-zwj"></span></div>
+<noscript><p>A csúszkához JavaScript kell.</p></noscript>
+<p class="meta">Danyi szerint július közepére a pengős bankjegyekért már szinte semmit sem lehetett venni, a hónap második felében a pengő zuhanása már csak papíron számított. Az állami fizetések ekkor már adópengőben jártak.</p>
+<h2>A teljes történet</h2><p><a href="v/magyarorszag-1946-mennyit-ert-a-fizetesed-mire-hazaertel-vele.html">Magyarország, 1946: mennyit ért a fizetésed, mire hazaértél vele?</a></p>
+<h2>Források</h2><ol class="forrasok"><li><a href="https://www.ksh.hu/statszemle_archive/all/2022/2022_12/2022_12_1106.pdf" rel="noopener nofollow">Danyi Pál 2022, Statisztikai Szemle</a></li><li><a href="https://www.mnb.hu/letoltes/horvath-karoly-horvath-zoltan-ujszaszi-robert-mar-hetven-eve-forinttal-fizetunk.pdf" rel="noopener nofollow">MNB: Már hetven éve forinttal fizetünk</a></li><li><a href="https://www.bcci.bg/resources/files/hanke-krus-hyperinflation-table.pdf" rel="noopener nofollow">Hanke és Krus 2012: World Hyperinflations, táblázat</a></li></ol></section>
+<script src="magyarazo.js" defer></script>
+</main>
+<footer class="lab"><div>
+<p class="temalink"><a href="tema/allatok.html">Állatok és növények</a><a href="tema/test.html">Test és étel</a><a href="tema/tortenelem.html">Történelem és közélet</a><a href="tema/bunugy.html">Bűnügyek</a><a href="tema/magyar.html">Magyarország</a><a href="tema/vilag.html">Világ és űr</a></p>
+<p class="temalink"><a href="kviz.html">Igaz vagy hamis? kvíz</a><a href="pengo.html">Pengő-kalkulátor</a><a href="rangsor.html">Rangsor-összehasonlító</a><a href="sorozatok.html">Sorozatok</a></p>
+<p class="koveto"><a href="https://www.youtube.com/@valobanhun" rel="noopener">YouTube</a><a href="https://www.tiktok.com/@valobanhun" rel="noopener">TikTok</a><a href="https://www.facebook.com/profile.php?id=61594155817912" rel="noopener">Facebook</a></p>
+<p>Üzemeltető: Boldurián Gábor, 1191 Budapest, Dobó Katica utca 13. · <a href="mailto:boldaszelet@gmail.com">boldaszelet@gmail.com</a> · Tárhely: GitHub, Inc. · Kiszolgálás: Cloudflare, Inc.</p>
+<p><a href="modszertan.html">Így dolgozunk</a> · <a href="adatvedelem.html">Adatkezelési tájékoztató</a> · Az oldal nem használ sütit és látogatómérést.</p>
+</div></footer>
+</body>
+</html>

@@ -28,6 +28,7 @@ GYOKER = Path(__file__).resolve().parents[2]
 ADAT = Path(__file__).with_name("videok.json")
 KERDESEK = Path(__file__).with_name("kerdesek.json")  # kézi: téma, ítélet, rövid válasz; bírálat után kerül ide
 SZOVEGEK = Path(__file__).with_name("szovegek.json")  # gyártásból: ~/Valoban/tools/web_adat.py
+MAGYARAZOK = Path(__file__).with_name("magyarazok.json")  # kézi: csak állítástáblában igazolt szám kerülhet ide
 WEB = GYOKER / "valoban"
 BOLD = "https://valoban.pages.dev/"  # a GitHub-cím is él: a Google és a TikTok arra hivatkozik
 CSATORNA = "UC7E2Nop5attkRyAdKO_RPlA"
@@ -42,6 +43,7 @@ NS = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/sche
       "m": "http://search.yahoo.com/mrss/"}
 BEMUTATO = {"AYiHXjghiBo"}  # a csatornabemutató 16:9, nem rész
 HIRLEVEL = False  # D-valoban-20261031-07: csak a Brevo-fiók és a tájékoztató élesítése után kapcsolható be
+LEJATSZO = False  # D-valoban-20261101-05: a YouTube-lejátszó harmadik fél, csak a tájékoztató módosítása után kapcsolható be
 FELIRATKOZAS = BOLD + "feliratkozas"  # a pages/_worker.js fogadja, ezért a látogató böngészőjébe nem kerül harmadik fél
 E = lambda s: html.escape(str(s), quote=True)
 TEMAK = {
@@ -51,6 +53,17 @@ TEMAK = {
     "bunugy": ("Bűnügyek", "Kiss Béla hordói és a Szépművészeti Múzeum 1983-as kirablása: ismert magyar bűnügyek, a legendák és a források szétválasztva."),
     "magyar": ("Magyarország", "A Balaton, a budai barlangok, a Rubik-kocka és a magyar nyelv: amit mindenki tud Magyarországról, és ami ebből tényleg igaz."),
     "vilag": ("Világ és űr", "A legnagyobb és a legkisebb országok, a Naprendszer holdjai és a Kínai Nagy Fal: érdekességek és rangsorok a világról."),
+}
+# Sorozat: a sorrend a bejárás sorrendje; a minta az új videókat is besorolja, az idk kézi lista.
+SOROZATOK = {
+    "tevhitek-a-mindennapokbol": {"cim": "Tévhitek a mindennapokból", "bev": "Agy, rágó, spenót, aranyhal: amit gyerekkorunk óta hallunk, és amit a források mondanak róla.",
+                                  "idk": ["lQpYMJPWcTQ", "R8eXoP633ag", "vAJqAcNm34c", "gfDzfdqawCg", "-qPA5UVFeMA", "pislXP2zkBs", "MqDxfR-HWHA"]},
+    "magyar-bunugyek": {"cim": "Magyar bűnügyek", "bev": "Kiss Béla hordói és a Szépművészeti Múzeum 1983-as kirablása, a legendák és a források szétválasztva.",
+                        "idk": ["go-T83QSGXk", "jMVAedKYUOc", "gbp71AGsPg0", "OR0aOsNjfV4", "IiaFU7AjV98"]},
+    "magyar-tortenelem": {"cim": "Magyar történelem, forrásból", "bev": "A Szent Korona útja, a pengő összeomlása, a kocsi szó eredete: hosszabb történetek és rövid ellenőrzések.",
+                          "idk": ["6typ5jL34gQ", "3Svi7Cu6Bjc", "TzIOiY9kORs", "3_SRn6sQumY", "M4Sv4Hx747s"]},
+    "rangsorok": {"cim": "Rangsorok", "bev": "A legnagyobbak és a legkisebbek, az ötödiktől az elsőig, mindig kimondott mércével.", "minta": r"^(A világ |Az |A Naprendszer )?5 le"},
+    "3-dolog": {"cim": "3 dolog, amit nem tudtál", "bev": "Rövid részek három meglepő ténnyel a polipokról, a Balatonról, a Rubik-kockáról és másról, forrásokkal.", "minta": r"^3 dolog"},
 }
 TEMASZO = {"allatok": "állat kutya macska hal madár pók kígyó polip cápa bálna rovar fa növény virág", "test": "agy test egészség étel vitamin szív csont alvás kávé",
            "bunugy": "gyilkos rablás bűn nyomoz lopt", "tortenelem": "háború király történelem forradalom csata korona",
@@ -281,12 +294,13 @@ def lap(cim, leiras, tartalom, utvonal, elo="", kep_ut="profil.png", extra="", t
 <body>
 <a class="ugras" href="#tartalom">Ugrás a tartalomra</a>
 <header class="fej"><a class="marka" href="{elo or './'}"><img src="{elo}profil.png" width="40" height="40" alt=""><span>Valóban<i>?</i></span></a>
-<nav aria-label="Fő"><a href="{elo}tevhitek.html">Tévhitek</a><a href="{elo}videok.html">Videók</a><a href="{elo}modszertan.html">Így dolgozunk</a>{f'<a href="{elo}hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}<a class="yt" href="{YT}" rel="noopener">YouTube</a></nav></header>
+<nav aria-label="Fő"><a href="{elo}kviz.html">Kvíz</a><a href="{elo}tevhitek.html">Tévhitek</a><a href="{elo}videok.html">Videók</a><a href="{elo}sorozatok.html">Sorozatok</a><a href="{elo}modszertan.html">Így dolgozunk</a>{f'<a href="{elo}hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}<a class="yt" href="{YT}" rel="noopener">YouTube</a></nav></header>
 <main id="tartalom">
 {tartalom}
 </main>
 <footer class="lab"><div>
 <p class="temalink">{"".join(f'<a href="{elo}tema/{k}.html">{n[0]}</a>' for k, n in TEMAK.items())}</p>
+<p class="temalink"><a href="{elo}kviz.html">Igaz vagy hamis? kvíz</a><a href="{elo}pengo.html">Pengő-kalkulátor</a><a href="{elo}rangsor.html">Rangsor-összehasonlító</a><a href="{elo}sorozatok.html">Sorozatok</a></p>
 <p class="koveto"><a href="{YT}" rel="noopener">YouTube</a><a href="{TT}" rel="noopener">TikTok</a><a href="{FB}" rel="noopener">Facebook</a></p>
 <p>Üzemeltető: Boldurián Gábor, 1191 Budapest, Dobó Katica utca 13. · <a href="mailto:boldaszelet@gmail.com">boldaszelet@gmail.com</a> · Tárhely: GitHub, Inc. · Kiszolgálás: Cloudflare, Inc.</p>
 <p><a href="{elo}modszertan.html">Így dolgozunk</a> · <a href="{elo}adatvedelem.html">Adatkezelési tájékoztató</a> · Az oldal nem használ sütit és látogatómérést.</p>
@@ -320,8 +334,15 @@ def kezdolap(v):
 <a class="kiemelt" href="v/{fo['slug']}.html"><img src="k/{fo['id']}.jpg" width="640" height="360" alt="" fetchpriority="high"><span class="cimke">Kezdd itt</span><span class="cim">{E(tiszta_cim(fo['cim']))}</span></a>
 </section>
 <section class="szamok" aria-label="Számokban"><dl><div><dt>videó</dt><dd>{len(v)}</dd></div><div><dt>különböző forrás</dt><dd>{forras}</dd></div><div><dt>forrásra visszavezetett állítás</dt><dd>{allitas}</dd></div></dl></section>
+<section class="napi"><h2 class="alatt">A mai kérdés: igaz vagy hamis?</h2><div data-kviz="nap"><a class="gomb" href="kviz.html">Játszom</a></div></section>
 <section><div class="sor"><h2>Legutóbb ellenőriztük</h2><a href="tevhitek.html">Az összes</a></div>
 <ul class="valaszok">{''.join(valaszsor(x) for x in ellenorzott[:6])}</ul></section>
+<section><h2 class="alatt">Próbáld ki</h2><ul class="temak probald">
+<li><a href="kviz.html"><b>Igaz vagy hamis?</b><span class="meta">{sum(1 for x in v if x.get("allitas_szoveg"))} állítás, azonnali válasszal</span></a></li>
+<li><a href="pengo.html"><b>Pengő-kalkulátor</b><span class="meta">Hány pengőt ér a pénzed 1946-os átváltással?</span></a></li>
+<li><a href="rangsor.html"><b>Rangsor-összehasonlító</b><span class="meta">Hányszor akkora Oroszország, mint Magyarország?</span></a></li>
+</ul></section>
+<section><div class="sor"><h2>Sorozatok</h2><a href="sorozatok.html">Összes</a></div><ul class="temak">{sorozatlista(v)}</ul></section>
 <section><h2 class="alatt">Témák</h2><ul class="temak">{temak}</ul></section>
 <section><div class="sor"><h2>Hosszú részek</h2><a href="videok.html#hosszu">Összes</a></div>
 <ul class="racs">{''.join(kartya(x) for x in hosszu[:6])}</ul></section>
@@ -337,7 +358,145 @@ def kezdolap(v):
                  "publisher": KIADO})
     return lap("Valóban? – magyar ismeretterjesztő csatorna",
                "Valóban? – magyar ismeretterjesztő csatorna: ismert történetek, állítások és rangsorok, forrásokkal. Végére járunk.",
-               t, "", extra=ld)
+               t, "", extra=ld + '\n<script src="kviz.js" defer></script>')
+
+
+def kerdessor(v):
+    """A kvíz adata: csak bírált ítélet és állításszöveg kerülhet bele, a régi videótól az újig."""
+    return [{"a": x["allitas_szoveg"], "i": ITELET[x["itelet"]], "c": x["itelet"], "r": x["rovid"], "u": x["slug"]}
+            for x in sorted(v, key=lambda y: y["ts"]) if x.get("allitas_szoveg") and x.get("itelet")]
+
+
+def kviz_js(v):
+    adat = json.dumps(kerdessor(v), ensure_ascii=False).replace("</", "<\\/")
+    return f"var KERDESEK={adat};\n" + Path(__file__).with_name("kviz.js").read_text()
+
+
+def kvizlap(v):
+    n = len(kerdessor(v))
+    bev = f"Igaz, részben igaz vagy tévhit? {n} elterjedt állítás, azonnali válasszal és forrással. Regisztráció és süti nélkül."
+    lista = "".join(f'<li><a href="v/{x["slug"]}.html"><span class="kerdes">{E(x["allitas_szoveg"])}</span>{csip(x)}<span class="valasz">{E(x["rovid"])}</span></a></li>'
+                    for x in sorted(v, key=lambda y: y["ts"]) if x.get("allitas_szoveg") and x.get("itelet"))
+    t = f"""<section class="archiv kviz"><h1>Igaz vagy hamis?</h1><p class="lede">{E(bev)}</p>
+<div data-kviz="kor"><p>A kvízhez JavaScript kell. Az állításokat és a válaszokat lentebb is megtalálod.</p></div>
+<p class="meta kviz-jegy">Minden kérdés egy már ellenőrzött állítás a csatornáról. A válaszaid a böngésződben maradnak, nem küldjük el és nem tároljuk őket. <a href="modszertan.html">Mit jelentenek az ítéletek?</a></p>
+<details class="kviz-lista"><summary>Az összes állítás, válasszal (lelövi a poént)</summary><ul class="valaszok egysoros">{lista}</ul></details></section>"""
+    return lap("Igaz vagy hamis? Kvíz – Valóban?", bev, t, "kviz.html", extra='\n<script src="kviz.js" defer></script>')
+
+
+def forraslista(fo):
+    return '<ol class="forrasok">' + "".join(f'<li><a href="{E(u)}" rel="noopener nofollow">{E(n)}</a></li>' for n, u in fo) + "</ol>"
+
+
+def videolink(x):
+    return f'<a href="v/{x["slug"]}.html">{E(tiszta_cim(x["cim"]))}</a>'
+
+
+def rangsorlap(v):
+    adat = json.loads(MAGYARAZOK.read_text())["rangsorok"]
+    szerint = {x["id"]: x for x in v}
+    nyers = json.dumps(adat, ensure_ascii=False).replace("</", "<\\/")
+    bev = "Hányszor akkora Oroszország, mint Magyarország? Válassz két országot, halat, kígyót vagy mamutfenyőt, és nézd meg az arányukat, forrásokkal, a bizonytalan értékeket jelölve."
+    resz = "".join(f"<li>{videolink(szerint[i])}</li>" for r in adat for i in r["videok"] if i in szerint)
+    fo = "".join(f'<h3>{E(r["cim"])}</h3>{forraslista(r["forrasok"])}' for r in adat)
+    t = f"""<section class="szoveg magyarazo" id="rangsor"><h1>Rangsor-összehasonlító</h1><p class="lede">{E(bev)}</p>
+<div class="fulek" role="group" aria-label="Adatsor"></div>
+<div class="r-valaszto"><label for="r-a">Első<select id="r-a"></select></label><label for="r-b">Második<select id="r-b"></select></label></div>
+<p id="r-mondat" class="r-mondat" aria-live="polite"></p>
+<div id="r-rajz" class="r-rajz" aria-hidden="true"></div>
+<p id="r-merce" class="meta"></p>
+<noscript><p>Az összehasonlítóhoz JavaScript kell.</p></noscript>
+<h2>A részek</h2><ul class="r-lista">{resz}</ul>
+<h2>Források</h2>{fo}</section>
+<script type="application/json" id="rangsor-adat">{nyers}</script>
+<script src="magyarazo.js" defer></script>"""
+    return lap("Rangsor-összehasonlító – Valóban?", bev, t, "rangsor.html")
+
+
+def pengolap(v):
+    fo = json.loads(MAGYARAZOK.read_text())["pengo"]["forrasok"]
+    resz = next((x for x in v if x["id"] == "3Svi7Cu6Bjc"), None)
+    bev = "Egy forint 200 millió adópengőt, vagyis 4 × 10²⁹ pengőt ért. Írj be egy összeget, és nézd meg, mennyi lett volna belőle pengőben."
+    t = f"""<section class="szoveg magyarazo" id="pengo"><h1>Pengő-kalkulátor</h1><p class="lede">{E(bev)}</p>
+<label class="p-cimke" for="p-ft">Összeg forintban</label>
+<div class="p-sor"><input id="p-ft" type="text" inputmode="numeric" autocomplete="off" value="1000" maxlength="15"><button class="gomb masod" type="button" data-ft="1">1 Ft</button><button class="gomb masod" type="button" data-ft="1000">1000 Ft</button><button class="gomb masod" type="button" data-ft="1000000">1 millió Ft</button></div>
+<div id="p-ki" class="p-ki" aria-live="polite">
+<p class="p-nagy"><span id="p-penz"></span> pengő</p>
+<p class="meta"><span id="p-jegy"></span> számjegy</p>
+<p><b><span id="p-ap"></span> adópengő</b></p>
+<p><b><span id="p-db"></span> darab</b> kellene az utolsó forgalomba került bankjegyből, a százmillió bilpengősből (10²⁰ pengő).</p>
+</div>
+<noscript><p>A kalkulátorhoz JavaScript kell. Az átváltás: 1 forint = 200 millió adópengő = 4 × 10²⁹ pengő.</p></noscript>
+<p class="meta">Ez a forint bevezetésekor rögzített hivatalos átváltás, nem vásárlóerő: nem azt mutatja, hogy mit lehetett venni a pénzből. Legfeljebb 12 jegyű, egész forintösszeget számolunk.</p>
+</section>
+<section class="szoveg magyarazo" id="olvadas"><h2>Mennyit ért a fizetésed néhány óra múlva?</h2>
+<p>Egy 2012-es nemzetközi táblázat szerint 1946 júliusában 15 óránként duplázódtak az árak. Ez a szám vitatott: Danyi Pál 2022-es újraszámítása szerint a júliusi átlagos infláció 4,39 × 10⁸% volt a táblázat 4,19 × 10¹⁶%-ával szemben. Ez a havi átlag nagyjából 34 órás duplázódásnak felel meg (saját számításunk). Ugyanez a táblázat a 2008-as zimbabwei csúcsra 24,7 órát becsül.</p>
+<p>Húzd a csúszkát: ennyi maradt volna a pénzed vásárlóerejéből, ha az adott tempó egyenletesen tartott volna.</p>
+<label class="p-cimke" for="o-ora"><span id="o-felirat">0 óra múlva</span></label>
+<input id="o-ora" class="o-csuszka" type="range" min="0" max="72" step="1" value="24">
+<div class="o-sav"><p>Magyarország, 1946, a 2012-es táblázat szerint (15 óra, vitatott): <b id="o-hu"></b></p><span class="r-jel" id="o-huj"></span></div>
+<div class="o-sav"><p>Magyarország, 1946, Danyi átlaga szerint (kb. 34 óra): <b id="o-da"></b></p><span class="r-jel" id="o-daj"></span></div>
+<div class="o-sav"><p>Zimbabwe, 2008 (becslés, 24,7 óra): <b id="o-zw"></b></p><span class="r-jel masik" id="o-zwj"></span></div>
+<noscript><p>A csúszkához JavaScript kell.</p></noscript>
+<p class="meta">Danyi szerint július közepére a pengős bankjegyekért már szinte semmit sem lehetett venni, a hónap második felében a pengő zuhanása már csak papíron számított. Az állami fizetések ekkor már adópengőben jártak.</p>
+{f'<h2>A teljes történet</h2><p>{videolink(resz)}</p>' if resz else ''}
+<h2>Források</h2>{forraslista(fo)}</section>
+<script src="magyarazo.js" defer></script>"""
+    return lap("Pengő-kalkulátor: mennyi egy forint pengőben? – Valóban?", cimke_leiras(bev), t, "pengo.html")
+
+
+def sorozat_tagok(s, v):
+    """A sorozat látható videói, a bejárás sorrendjében; a bemutató és a vékony vágatok kimaradnak."""
+    if "idk" in s:
+        szerint = {x["id"]: x for x in v if not vekony(x)}
+        return [szerint[i] for i in s["idk"] if i in szerint]
+    return sorted([x for x in v if re.search(s["minta"], tiszta_cim(x["cim"])) and not vekony(x)], key=lambda y: y["ts"])
+
+
+def sorozatlista(v):
+    return "".join(f'<li><a href="sorozat/{k}.html"><b>{E(s["cim"])}</b><span class="meta">{len(sorozat_tagok(s, v))} rész</span></a></li>' for k, s in SOROZATOK.items())
+
+
+def sorozatlap(k, v):
+    s = SOROZATOK[k]
+    tag = sorozat_tagok(s, v)
+    t = f"""<section class="archiv"><nav class="morzsa" aria-label="Morzsamenü"><a href="../">Valóban?</a> › <a href="../sorozatok.html">Sorozatok</a> › <span aria-current="page">{E(s["cim"])}</span></nav>
+<h1>{E(s["cim"])}</h1><p class="lede">{E(s["bev"])}</p>
+<p class="gombok"><a class="gomb" href="../v/{tag[0]["slug"]}.html">Elölről kezdem</a></p></section>
+<section><ol class="sorrend">{"".join(f'<li><a href="../v/{x["slug"]}.html"><img src="../k/{x["id"]}.jpg" width="{360 if x["tipus"] == "shorts" else 640}" height="{640 if x["tipus"] == "shorts" else 360}" alt="" loading="lazy"><span class="cim">{E(tiszta_cim(x["cim"]))}</span>{csip(x)}</a></li>' for x in tag)}</ol></section>"""
+    ld = morzsa(("Valóban?", ""), ("Sorozatok", "sorozatok.html"), (s["cim"], f"sorozat/{k}.html")) + jsonld(
+        {"@context": "https://schema.org", "@type": "ItemList", "name": s["cim"], "itemListOrder": "https://schema.org/ItemListOrderAscending",
+         "itemListElement": [{"@type": "ListItem", "position": n + 1, "url": f"{BOLD}v/{x['slug']}.html"} for n, x in enumerate(tag)]})
+    return lap(f"{s['cim']} – a Valóban? videósorozata", s["bev"], t, f"sorozat/{k}.html", "../", extra=ld)
+
+
+def sorozatok_lap(v):
+    bev = "A Valóban? részei sorba rendezve: tévhitek, magyar bűnügyek, történelem, rangsorok. Kezdd az elején, és haladj részről részre."
+    t = f"""<section class="archiv"><h1>Sorozatok</h1><p class="lede">{E(bev)}</p></section>
+<section><ul class="temak">{sorozatlista(v)}</ul></section>"""
+    return lap("Videósorozatok: tévhitek, bűnügyek, rangsorok – Valóban?", bev, t, "sorozatok.html")
+
+
+def probalink(x):
+    """A részhez tartozó interaktív lap, ha van."""
+    if x["id"] in ("3Svi7Cu6Bjc", "ibcqYCo8HUY"):
+        return '<p class="proba"><a href="../pengo.html">Próbáld ki a pengő-kalkulátort</a></p>'
+    if any(x["id"] in r["videok"] for r in json.loads(MAGYARAZOK.read_text())["rangsorok"]):
+        return '<p class="proba"><a href="../rangsor.html">Hasonlítsd össze a rangsor-összehasonlítóval</a></p>'
+    return ""
+
+
+def sorozat_sav(x, v):
+    """A videólap navigációja: hol tartasz a sorozatban, és mi jön."""
+    for k, s in SOROZATOK.items():
+        tag = sorozat_tagok(s, v)
+        i = next((n for n, y in enumerate(tag) if y["id"] == x["id"]), None)
+        if i is None:
+            continue
+        elozo = f'<a href="{tag[i - 1]["slug"]}.html">Előző</a>' if i else ""
+        kov = f'<a class="gomb" href="{tag[i + 1]["slug"]}.html">Következő rész</a>' if i + 1 < len(tag) else '<a class="gomb" href="../sorozatok.html">Vége, jöhet a másik sorozat</a>'
+        return f'<nav class="sorozat-sav" aria-label="Sorozat"><p><span class="meta">Sorozat, {i + 1}/{len(tag)}. rész</span><a href="../sorozat/{k}.html"><b>{E(s["cim"])}</b></a></p><p class="sorozat-gomb">{elozo}{kov}</p></nav>'
+    return ""
 
 
 def hirlevel_blokk():
@@ -423,7 +582,7 @@ def iso(ts):
     return dt.datetime.fromtimestamp(ts, BP).isoformat()
 
 
-def videolap(x, tobbi, par=None):
+def videolap(x, tobbi, par=None, sav=""):
     bek, forras, kredit, gep = bont(x["leiras"])
     cim = tiszta_cim(x["cim"])
     allo = x["tipus"] == "shorts"
@@ -445,10 +604,11 @@ def videolap(x, tobbi, par=None):
     mm = "".join(f'<a href="../{u}">{E(c)}</a> › ' for c, u in utak[:-1]) + f'<span aria-current="page">{E(cim)}</span>'
     t = f"""<nav class="morzsa" aria-label="Morzsamenü">{mm}</nav>
 <article class="vid{' vid-allo' if allo else ''}">
-<a class="vid-kep" href="{url}" rel="noopener"><img src="../k/{x['id']}.jpg" alt="" width="{360 if allo else 640}" height="{640 if allo else 360}"><span class="play">Megnézem a YouTube-on</span></a>
+<a class="vid-kep" href="{url}" rel="noopener"{f' data-yt="{x["id"]}"' if LEJATSZO else ''}><img src="../k/{x['id']}.jpg" alt="" width="{360 if allo else 640}" height="{640 if allo else 360}"><span class="play">{'Lejátszás itt (a YouTube-ról töltődik be)' if LEJATSZO else 'Megnézem a YouTube-on'}</span></a>
 <div class="vid-sz"><p class="meta">{E(meta)}</p><h1>{E(cim)}</h1>
 <div class="rovid">{csip(x)}<p><b>Röviden:</b> {E(valasz)}</p></div>
 {szov}
+{sav}
 <p class="gombok">{f'<a class="gomb" href="{par["slug"]}.html">A teljes rész</a>' if par else ''}<a class="gomb{' masod' if par else ''}" href="{YT}?sub_confirmation=1" rel="noopener">Feliratkozom</a>{'<a class="gomb masod" href="../hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}</p>
 {'<h2>A rész teljes szövege</h2>' + ''.join(f'<p>{E(p)}</p>' for p in atirat) if atirat else ''}
 {f'<h2>Források</h2><ol class="forrasok">{src}</ol>' if src else ''}
@@ -463,7 +623,7 @@ def videolap(x, tobbi, par=None):
             "mainEntityOfPage": f"{BOLD}v/{x['slug']}.html", "citation": [u for _, u in forras][:30]}
     if nap:
         cikk["dateModified"] = nap
-    ld = jsonld(cikk) + morzsa(*utak)
+    ld = jsonld(cikk) + morzsa(*utak) + ('\n<script src="../lejatszo.js" defer></script>' if LEJATSZO else "")
     if x.get("allitas_szoveg"):
         ld += jsonld({"@context": "https://schema.org", "@type": "ClaimReview", "url": f"{BOLD}v/{x['slug']}.html", "claimReviewed": x["allitas_szoveg"],
                       "itemReviewed": {"@type": "Claim", "appearance": {"@type": "CreativeWork", "url": url}}, "author": KIADO, "datePublished": dt.datetime.fromtimestamp(x["ts"], BP).date().isoformat(),
@@ -494,7 +654,7 @@ def temalap(k, v):
 def tevhitek(v):
     sor = [x for x in v if x.get("itelet")]
     bev = "Igaz, részben igaz, vitatott vagy tévhit? Elterjedt magyar és nemzetközi állítások, rövid válasszal és nyilvános forrásokkal."
-    t = f"""<section class="archiv"><h1>Tévhitek és ellenőrzött állítások</h1><p class="lede">{E(bev)}</p></section>
+    t = f"""<section class="archiv"><h1>Tévhitek és ellenőrzött állítások</h1><p class="lede">{E(bev)}</p><p class="gombok"><a class="gomb" href="kviz.html">Teszteld magad a kvízzel</a></p></section>
 <section><ul class="valaszok egysoros">{''.join(valaszsor(x) for x in sor)}</ul></section>"""
     return lap("Tévhitek és ellenőrzött állítások – Valóban?", bev, t, "tevhitek.html")
 
@@ -529,7 +689,8 @@ def csatorna(v):
 def llms(v):
     sor = "\n".join(f"- [{tiszta_cim(x['cim'])}]({BOLD}v/{x['slug']}.html): {rovid(x)}" for x in v if x.get("itelet"))
     return (f"# Valóban?\n\n> Magyar ismeretterjesztő csatorna. Elterjedt állításokat ellenőrzünk, nyilvános forrásokkal.\n\n"
-            f"- [Így dolgozunk]({BOLD}modszertan.html)\n- [Minden videó]({BOLD}videok.html)\n\n## Ellenőrzött állítások\n\n{sor}\n")
+            f"- [Így dolgozunk]({BOLD}modszertan.html)\n- [Minden videó]({BOLD}videok.html)\n- [Sorozatok]({BOLD}sorozatok.html)\n"
+            f"- [Igaz vagy hamis? kvíz]({BOLD}kviz.html)\n- [Pengő-kalkulátor]({BOLD}pengo.html)\n- [Rangsor-összehasonlító]({BOLD}rangsor.html)\n\n## Ellenőrzött állítások\n\n{sor}\n")
 
 
 def megosztokep(x):
@@ -581,8 +742,10 @@ def gazdagit(videok):
 def terkep(v):
     nap = lambda ts: dt.datetime.fromtimestamp(ts, BP).date().isoformat()
     u = [(BOLD, nap(v[0]["ts"])), (BOLD + "videok.html", nap(v[0]["ts"])), (BOLD + "tevhitek.html", nap(v[0]["ts"])), (BOLD + "modszertan.html", None),
+         (BOLD + "kviz.html", nap(v[0]["ts"])), (BOLD + "pengo.html", None), (BOLD + "rangsor.html", None), (BOLD + "sorozatok.html", None),
          (BOLD + "adatvedelem.html", None)] + ([(BOLD + "hirlevel.html", None)] if HIRLEVEL else [])
     u += [(f"{BOLD}tema/{k}.html", nap(v[0]["ts"])) for k in TEMAK]
+    u += [(f"{BOLD}sorozat/{k}.html", None) for k in SOROZATOK]
     u += [(f"{BOLD}v/{x['slug']}.html", x.get("ellenorizve") or nap(x["ts"])) for x in v if not vekony(x)]
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             + "".join(f"<url><loc>{E(a)}</loc>{f'<lastmod>{d}</lastmod>' if d else ''}</url>\n" for a, d in u) + "</urlset>\n")
@@ -613,7 +776,7 @@ def main():
         rokon = lathato[n + 1:] + lathato[:n]
         jo = [x for x in rokon if x["tipus"] == v["tipus"] and x["id"] not in BEMUTATO]
         tobbi = ([x for x in jo if x.get("tema") == v.get("tema")] + [x for x in jo if x.get("tema") != v.get("tema")])[:6]
-        (WEB / "v" / f"{v['slug']}.html").write_text(videolap(v, tobbi, par.get(v["id"])))
+        (WEB / "v" / f"{v['slug']}.html").write_text(videolap(v, tobbi, par.get(v["id"]), probalink(v) + sorozat_sav(v, lathato)))
         (WEB / "v" / f"{v['id']}.html").write_text(atiranyit(v))
     (WEB / "index.html").write_text(kezdolap(lathato))
     (WEB / "videok.html").write_text(archivum(lathato))
@@ -621,6 +784,17 @@ def main():
     (WEB / "modszertan.html").write_text(modszertan())
     for k in TEMAK:
         (WEB / "tema" / f"{k}.html").write_text(temalap(k, lathato))
+    (WEB / "sorozat").mkdir(exist_ok=True)
+    for k in SOROZATOK:
+        (WEB / "sorozat" / f"{k}.html").write_text(sorozatlap(k, lathato))
+    (WEB / "sorozatok.html").write_text(sorozatok_lap(lathato))
+    (WEB / "kviz.html").write_text(kvizlap(lathato))
+    (WEB / "kviz.js").write_text(kviz_js(lathato))
+    (WEB / "pengo.html").write_text(pengolap(lathato))
+    (WEB / "rangsor.html").write_text(rangsorlap(lathato))
+    (WEB / "magyarazo.js").write_text(Path(__file__).with_name("magyarazo.js").read_text())
+    if LEJATSZO:
+        (WEB / "lejatszo.js").write_text(Path(__file__).with_name("lejatszo.js").read_text())
     (WEB / "sitemap.xml").write_text(terkep(lathato))
     (WEB / "feed.xml").write_text(csatorna(lathato))
     (WEB / "llms.txt").write_text(llms(lathato))

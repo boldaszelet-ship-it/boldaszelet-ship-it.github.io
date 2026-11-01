@@ -1,0 +1,98 @@
+{
+ "rangsorok": [
+  {
+   "kulcs": "orszagok",
+   "cim": "Országok területe",
+   "merce": "Teljes terület négyzetkilométerben, a szárazföld és a vízfelület együtt. Budapest város, nem ország, viszonyításnak szerepel.",
+   "egyseg": "km²",
+   "forma": "terulet",
+   "ige": "akkora",
+   "kozep": "nagyobb",
+   "alap": ["Oroszország", "Magyarország"],
+   "tetelek": [
+    {"n": "Oroszország", "v": 17098242},
+    {"n": "Kanada", "v": 9984670},
+    {"n": "Egyesült Államok", "v": 9833517, "nevelo": true},
+    {"n": "Kína", "v": 9596960},
+    {"n": "Brazília", "v": 8515770},
+    {"n": "Magyarország", "v": 93028},
+    {"n": "Budapest", "v": 525.1},
+    {"n": "San Marino", "v": 61},
+    {"n": "Tuvalu", "v": 26},
+    {"n": "Nauru", "v": 21},
+    {"n": "Monaco", "v": 2, "kb": true},
+    {"n": "Vatikán", "v": 0.44, "nevelo": true}
+   ],
+   "megjegyzes": "A 3. hely forrásfüggő: az Egyesült Államok számában benne vannak a parti vizek és a felségvizek, nélkülük Kína nagyobb lenne.",
+   "videok": ["1Y8MmnqHeYU", "fn8w5lDjNLg"],
+   "forrasok": [
+    ["CIA World Factbook: területi rangsor (archív, 2026. január)", "https://web.archive.org/web/20260104222248id_/https://www.cia.gov/the-world-factbook/page-data/field/area/country-comparison/page-data.json"],
+    ["KSH helységnévtár: Budapest", "https://www.ksh.hu/apps/hntr.telepules?p_lang=HU&p_id=13578"],
+    ["US Census: területi adatok (2010)", "https://www.census.gov/geographies/reference-files/2010/geo/state-area.html"]
+   ]
+  },
+  {
+   "kulcs": "hosszu-allatok",
+   "cim": "Halak és kígyók hossza",
+   "merce": "Teljes hossz méterben, a legnagyobb ismert vagy dokumentált példány szerint. A kígyóknál fogságban mért érték is szerepel (kockás piton, királykobra). A „kb.” becslést, felső értéket vagy vitatott, illetve egyetlen régi feljegyzést jelöl.",
+   "egyseg": "m",
+   "forma": "hossz",
+   "ige": "olyan hosszú",
+   "kozep": "hosszabb",
+   "nevelo": true,
+   "alap": ["cetcápa", "kockás piton"],
+   "tetelek": [
+    {"n": "cetcápa", "v": 18.8},
+    {"n": "óriáscápa", "v": 12.27},
+    {"n": "szíjhal", "v": 8, "kb": true},
+    {"n": "kockás piton", "v": 7.67},
+    {"n": "zöld anakonda", "v": 7.49, "kb": true},
+    {"n": "viza", "v": 7.3, "kb": true},
+    {"n": "afrikai sziklapiton", "v": 7, "kb": true},
+    {"n": "fehér cápa", "v": 7, "kb": true},
+    {"n": "sötét tigrispiton", "v": 5.79},
+    {"n": "királykobra", "v": 5.71}
+   ],
+   "megjegyzes": "",
+   "videok": ["S3WCiTDs5qw", "TUh45j3WeFU"],
+   "forrasok": [
+    ["McClain és mtsai 2015, PeerJ", "https://pmc.ncbi.nlm.nih.gov/articles/PMC4304853/"],
+    ["Guinness World Records: legnagyobb anadrom hal", "https://www.guinnessworldrecords.com/world-records/542172-largest-anadromous-fish"],
+    ["Reed és Rodda 2009, USGS", "https://pubs.usgs.gov/of/2009/1202/pdf/OF09-1202.pdf"],
+    ["Guinness World Records: leghosszabb kígyó fogságban", "https://www.guinnessworldrecords.com/world-records/longest-snake-ever-(captivity)"],
+    ["Guinness World Records: leghosszabb mérges kígyó példány", "https://www.guinnessworldrecords.com/world-records/468357-longest-venomous-snake-specimen"],
+    ["Conservancy of Southwest Florida, 2023", "https://conservancy.org/conservancy-measures-longest-burmese-python-ever-captured/"]
+   ]
+  },
+  {
+   "kulcs": "mamutfenyok",
+   "cim": "Mamutfenyők törzse",
+   "merce": "A törzs térfogata köbméterben, ágak, lomb és gyökér nélkül.",
+   "egyseg": "m³",
+   "forma": "hossz",
+   "ige": "akkora",
+   "kozep": "nagyobb",
+   "nevelo": true,
+   "alap": ["General Sherman", "Stagg"],
+   "tetelek": [
+    {"n": "General Sherman", "v": 1487},
+    {"n": "General Grant", "v": 1320},
+    {"n": "President", "v": 1278},
+    {"n": "Lincoln", "v": 1259},
+    {"n": "Stagg", "v": 1205}
+   ],
+   "megjegyzes": "A National Park Service táblázata régebbi mérésekre épül, a 2020–21-es tüzek utáni állapotot nem ellenőriztük.",
+   "videok": ["dmdhGWwUs08"],
+   "forrasok": [
+    ["National Park Service: a világ legnagyobb fái", "https://www.nps.gov/seki/learn/nature/largest-trees-in-world.htm"]
+   ]
+  }
+ ],
+ "pengo": {
+  "forrasok": [
+   ["Danyi Pál 2022, Statisztikai Szemle", "https://www.ksh.hu/statszemle_archive/all/2022/2022_12/2022_12_1106.pdf"],
+   ["MNB: Már hetven éve forinttal fizetünk", "https://www.mnb.hu/letoltes/horvath-karoly-horvath-zoltan-ujszaszi-robert-mar-hetven-eve-forinttal-fizetunk.pdf"],
+   ["Hanke és Krus 2012: World Hyperinflations, táblázat", "https://www.bcci.bg/resources/files/hanke-krus-hyperinflation-table.pdf"]
+  ]
+ }
+}
