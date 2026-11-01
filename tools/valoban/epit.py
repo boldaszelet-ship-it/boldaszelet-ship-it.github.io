@@ -48,7 +48,7 @@ TEMAK = {
     "allatok": ("Állatok és növények", "Mekkora a legnagyobb pók, mire emlékszik az aranyhal, és miért vált színt a kaméleon? Rangsorok és tévhitek az élővilágból, mért számokkal."),
     "test": ("Test és étel", "Tényleg csak az agyunk 10 százalékát használjuk? Mi lesz a lenyelt rágóval? Hétköznapi tévhitek a testünkről és az ételeinkről, forrásokkal."),
     "tortenelem": ("Történelem és közélet", "A Szent Koronától a pengőig és az őszödi beszédig: magyar történetek és állítások, ahogy a korabeli források és az iratok mutatják."),
-    "bunugy": ("Bűnügyek", "Kiss Béla hordói és a Szépművészeti Múzeum 1983-as kirablása: ismert magyar bűnügyek, a legendáktól megtisztítva."),
+    "bunugy": ("Bűnügyek", "Kiss Béla hordói és a Szépművészeti Múzeum 1983-as kirablása: ismert magyar bűnügyek, a legendák és a források szétválasztva."),
     "magyar": ("Magyarország", "A Balaton, a budai barlangok, a Rubik-kocka és a magyar nyelv: amit mindenki tud Magyarországról, és ami ebből tényleg igaz."),
     "vilag": ("Világ és űr", "A legnagyobb és a legkisebb országok, a Naprendszer holdjai és a Kínai Nagy Fal: érdekességek és rangsorok a világról."),
 }
@@ -307,7 +307,7 @@ def kezdolap(v):
     shorts = [x for x in v if x["tipus"] == "shorts"]
     fo = next((x for x in v if x["id"] in BEMUTATO), hosszu[0])
     ellenorzott = [x for x in v if x.get("itelet")]
-    forras = sum(len(bont(x["leiras"])[1]) for x in v)
+    forras = len({u for x in v for _, u in bont(x["leiras"])[1]})
     allitas = sum(x.get("allitas", 0) for x in v)
     temak = "".join(f'<li><a href="tema/{k}.html"><b>{E(n[0])}</b><span class="meta">{sum(x.get("tema") == k for x in v)} videó</span></a></li>' for k, n in TEMAK.items())
     t = f"""<section class="hos"><div class="hos-sz">
@@ -317,9 +317,9 @@ def kezdolap(v):
 {kereso()}
 <p class="gombok"><a class="gomb" href="{YT}?sub_confirmation=1" rel="noopener">Feliratkozom</a><a class="gomb masod" href="videok.html">Mind a {len(v)} videó</a></p>
 </div>
-<a class="kiemelt" href="v/{fo['slug']}.html"><img src="k/{fo['id']}.jpg" width="640" height="360" alt=""><span class="cimke">Kezdd itt</span><span class="cim">{E(tiszta_cim(fo['cim']))}</span></a>
+<a class="kiemelt" href="v/{fo['slug']}.html"><img src="k/{fo['id']}.jpg" width="640" height="360" alt="" fetchpriority="high"><span class="cimke">Kezdd itt</span><span class="cim">{E(tiszta_cim(fo['cim']))}</span></a>
 </section>
-<section class="szamok" aria-label="Számokban"><dl><div><dt>videó</dt><dd>{len(v)}</dd></div><div><dt>forrás a videók leírásában</dt><dd>{forras}</dd></div><div><dt>forrással igazolt állítás</dt><dd>{allitas}</dd></div></dl></section>
+<section class="szamok" aria-label="Számokban"><dl><div><dt>videó</dt><dd>{len(v)}</dd></div><div><dt>különböző forrás</dt><dd>{forras}</dd></div><div><dt>forrásra visszavezetett állítás</dt><dd>{allitas}</dd></div></dl></section>
 <section><div class="sor"><h2>Legutóbb ellenőriztük</h2><a href="tevhitek.html">Az összes</a></div>
 <ul class="valaszok">{''.join(valaszsor(x) for x in ellenorzott[:6])}</ul></section>
 <section><h2 class="alatt">Témák</h2><ul class="temak">{temak}</ul></section>
@@ -334,8 +334,7 @@ def kezdolap(v):
 </ol><p class="hiba">Hibát találtál? Írd meg: <a href="mailto:boldaszelet@gmail.com">boldaszelet@gmail.com</a></p></section>
 <section class="app"><h2>A feltöltő alkalmazásról</h2><p>A „Valoban Feltolto” a csatorna saját, belső eszköze: a YouTube Data API-n keresztül tölti fel és ütemezi a csatorna saját videóit. Más felhasználók nem használják, és más fiók adataihoz nem fér hozzá. Részletek: <a href="adatvedelem.html">adatkezelési tájékoztató</a>.</p></section>"""
     ld = jsonld({"@context": "https://schema.org", "@type": "WebSite", "name": "Valóban?", "url": BOLD, "inLanguage": "hu",
-                 "publisher": KIADO, "potentialAction": {"@type": "SearchAction", "target": BOLD + "videok.html?q={search_term_string}",
-                                                         "query-input": "required name=search_term_string"}})
+                 "publisher": KIADO})
     return lap("Valóban? – magyar ismeretterjesztő csatorna",
                "Valóban? – magyar ismeretterjesztő csatorna: ismert történetek, állítások és rangsorok, forrásokkal. Végére járunk.",
                t, "", extra=ld)
@@ -404,7 +403,7 @@ def rovid(x):
         return x["rovid"]
     bek = bont(x["leiras"])[0]
     s = re.sub(r"\s*A teljes .*$", "", bek[0]) if bek else tiszta_cim(x["cim"])
-    m = re.match(r".{40,300}?[.?!](?=\s|$)", s, re.S)
+    m = re.match(r".{80,300}?[.?!](?=\s|$)", s, re.S)
     return m.group(0) if m else s[:299].rsplit(" ", 1)[0] + "…"
 
 
@@ -433,12 +432,13 @@ def videolap(x, tobbi, par=None):
     valasz = rovid(x)
     osszeg = cimke_leiras(valasz)
     tema = x.get("tema")
-    szov = "".join(f"<p>{linkes(re.sub(r' *A teljes [^.:]*: *https?://youtu[^ ]+', '', p))}</p>" for p in bek)
+    tisztit = lambda p: re.sub(r" *A teljes [^.:]*: *https?://youtu[^ ]+", "", x.get("torol") and p.replace(x["torol"], "") or p)
+    szov = "".join(f"<p>{linkes(tisztit(p))}</p>" for p in bek)
     atirat = x.get("atirat")
     src = "".join(f'<li><a href="{E(u)}" rel="noopener nofollow">{E(n)}</a></li>' for n, u in forras)
     allitas = x.get("allitas")
     nap = x.get("ellenorizve")
-    ell = " · ".join(y for y in (f"{allitas} forrással igazolt állítás" if allitas else "", f"{len(forras)} forrás" if forras else "",
+    ell = " · ".join(y for y in (f"{allitas} forrásra visszavezetett állítás" if allitas else "", f"{len(forras)} forrás" if forras else "",
                                  f"utoljára ellenőrizve: {datum(int(dt.datetime.fromisoformat(nap).replace(tzinfo=BP).timestamp()))}" if nap else "") if y)
     targy = f"Hiba: {cim}"
     utak = [("Valóban?", "")] + ([(TEMAK[tema][0], f"tema/{tema}.html")] if tema in TEMAK else []) + [(cim, f"v/{x['slug']}.html")]
@@ -453,7 +453,7 @@ def videolap(x, tobbi, par=None):
 {'<h2>A rész teljes szövege</h2>' + ''.join(f'<p>{E(p)}</p>' for p in atirat) if atirat else ''}
 {f'<h2>Források</h2><ol class="forrasok">{src}</ol>' if src else ''}
 {f'<p class="ellenorzes">{E(ell)} · <a href="../modszertan.html">Hogyan ellenőrzünk?</a></p>' if ell else ''}
-<p class="hiba">Hibát találtál? <a href="mailto:boldaszelet@gmail.com?subject={urllib.parse.quote(targy)}">Írd meg nekünk</a>, és kijavítjuk.</p>
+<p class="hiba">Hibát találtál? <a href="mailto:boldaszelet@gmail.com?subject={urllib.parse.quote(targy)}">Írd meg nekünk</a>, megnézzük.</p>
 {f'<p class="meta kozles">{linkes(" ".join(gep))}</p>' if gep else ''}
 {'<details class="kredit"><summary>Képek és kreditek</summary>' + ''.join(f'<p>{linkes(k)}</p>' for k in kredit) + '</details>' if kredit else ''}
 </div></article>
@@ -464,11 +464,11 @@ def videolap(x, tobbi, par=None):
     if nap:
         cikk["dateModified"] = nap
     ld = jsonld(cikk) + morzsa(*utak)
-    if x.get("itelet"):
-        ld += jsonld({"@context": "https://schema.org", "@type": "ClaimReview", "url": f"{BOLD}v/{x['slug']}.html", "claimReviewed": cim,
-                      "author": KIADO, "datePublished": dt.datetime.fromtimestamp(x["ts"], BP).date().isoformat(),
+    if x.get("allitas_szoveg"):
+        ld += jsonld({"@context": "https://schema.org", "@type": "ClaimReview", "url": f"{BOLD}v/{x['slug']}.html", "claimReviewed": x["allitas_szoveg"],
+                      "itemReviewed": {"@type": "Claim", "appearance": {"@type": "CreativeWork", "url": url}}, "author": KIADO, "datePublished": dt.datetime.fromtimestamp(x["ts"], BP).date().isoformat(),
                       "reviewRating": {"@type": "Rating", "ratingValue": ERTEKELES[x["itelet"]], "bestRating": 5, "worstRating": 1, "alternateName": x["itelet"]}})
-    return lap(f"{cim} – Valóban?", osszeg, t, f"v/{(par['slug'] if vekony(x) else x['slug'])}.html", "../", f"o/{x['id']}.jpg", ld, "article")
+    return lap(f"{cim} – Valóban?" if len(cim) <= 60 else cim, osszeg, t, f"v/{(par['slug'] if vekony(x) else x['slug'])}.html", "../", f"o/{x['id']}.jpg", ld, "article")
 
 
 def atiranyit(x):
@@ -493,7 +493,7 @@ def temalap(k, v):
 
 def tevhitek(v):
     sor = [x for x in v if x.get("itelet")]
-    bev = "Igaz, részben igaz vagy tévhit? Elterjedt magyar és nemzetközi állítások, mindegyik egyértelmű válasszal és nyilvános forrásokkal."
+    bev = "Igaz, részben igaz, vitatott vagy tévhit? Elterjedt magyar és nemzetközi állítások, rövid válasszal és nyilvános forrásokkal."
     t = f"""<section class="archiv"><h1>Tévhitek és ellenőrzött állítások</h1><p class="lede">{E(bev)}</p></section>
 <section><ul class="valaszok egysoros">{''.join(valaszsor(x) for x in sor)}</ul></section>"""
     return lap("Tévhitek és ellenőrzött állítások – Valóban?", bev, t, "tevhitek.html")
@@ -502,19 +502,19 @@ def tevhitek(v):
 def modszertan():
     bev = "Hogyan készül a Valóban?: forrásellenőrzés, kiadás előtti ellenőrzések, gépi hang és hibajavítás."
     t = f"""<section class="szoveg"><h1>Így dolgozunk</h1><p class="lede">Azt ellenőrizzük, amit mindenki tud. A cél nem az, hogy jól hangozzon, hanem hogy kiderüljön, mi igaz, és bárki utánanézhessen.</p>
-<h2>Forrás nélkül nincs mondat</h2>
-<p>Minden videóhoz állítástábla készül: a szöveg minden tényállítása külön sort kap, a forrással és a forrás fokozatával. Az a tényállítás, amely mögött nincs megfelelő forrás, nem maradhat a szövegben. A felhasznált forrásokat minden videó oldalán felsoroljuk.</p>
+<h2>Forrás nélkül nem állítunk</h2>
+<p>Minden videóhoz állítástábla készül: az ellenőrizhető tényállítások külön sort kapnak, a forrással és a forrás fokozatával. Gépi kapu nézi, hogy a számot, nevet vagy kizárólagos állítást tartalmazó mondatok mögött van-e forrás. Ahol a források eltérnek, a szöveg ezt megmondja, vagy a közös részükre szorítkozik. A felhasznált forrásokat minden videó oldalán felsoroljuk.</p>
 <h2>Mit jelentenek az ítéletek?</h2>
 <dl class="fogalmak"><dt><span class="itelet igaz">Igaz</span></dt><dd>A források alátámasztják az állítást.</dd>
 <dt><span class="itelet reszben">Részben igaz</span></dt><dd>Van benne igazság, de pontosítani kell.</dd>
 <dt><span class="itelet reszben">Vitatott</span></dt><dd>A megbízható források más-más eredményre jutnak, ezért mindkettőt bemutatjuk.</dd>
 <dt><span class="itelet hamis">Tévhit</span></dt><dd>A források nem támasztják alá, vagy ellentmondanak neki.</dd></dl>
 <h2>Kiadás előtt</h2>
-<p>Egy videó csak akkor jelenik meg, ha átment a tényellenőrzésen, a jogi és a minőségi bírálaton, a nyelvi ellenőrzésen és a képek licencvizsgálatán. A vitatott állításoknál megnevezzük, ki állítja, és nem írunk fenntartás nélküli felsőfokot.</p>
-<h2>Gép és ember</h2>
-<p>A Valóban? mesterséges intelligenciával támogatott gyártósoron készül: a szöveg megírásában, a bírálatban és a vágásban is gépi eszközök dolgoznak, a narrációt pedig gép olvassa fel, nem ember. Ezt minden videó leírásában közöljük. A csatorna üzemeltetője: Boldurián Gábor.</p>
+<p>Egy videó csak akkor jelenik meg, ha átment a gépi tényellenőrző kapun, a tényellenőrzésen és a nyelvi ellenőrzésen. A hosszú részek ezen felül jogi és minőségi bírálatot is kapnak, ahogy az érzékeny közéleti témák is jogit. A jogi bírálatot gépi szerep végzi, nem ügyvéd.</p>
+<h2>Gépi gyártás</h2>
+<p>A Valóban? mesterséges intelligenciával támogatott gyártósoron készül: a szöveg megírásában, a bírálatban és a vágásban is gépi eszközök dolgoznak, a narrációt pedig gép olvassa fel, nem ember. A gépi narrációt minden videó leírásában közöljük. A csatorna üzemeltetője: Boldurián Gábor.</p>
 <h2>Hibát találtál?</h2>
-<p>Írd meg a <a href="mailto:boldaszelet@gmail.com?subject=Hiba%20a%20Val%C3%B3ban%3F%20oldal%C3%A1n">boldaszelet@gmail.com</a> címre, lehetőleg a forrással együtt. Ha igazad van, kijavítjuk az oldalon és a videó leírásában.</p></section>"""
+<p>Írd meg a <a href="mailto:boldaszelet@gmail.com?subject=Hiba%20a%20Val%C3%B3ban%3F%20oldal%C3%A1n">boldaszelet@gmail.com</a> címre, lehetőleg a forrással együtt. Ha igazad van, kijavítjuk az oldalon és a videó leírásában. A videóban elhangzott hibát a leírásban jelezzük.</p></section>"""
     return lap("Így dolgozunk – Valóban?", bev, t, "modszertan.html")
 
 
