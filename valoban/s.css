@@ -95,6 +95,12 @@ main>section{margin-top:clamp(48px,7vw,88px)}
 .hirlevel-sor input{flex:1 1 240px;min-width:0;font:inherit;font-size:1rem;color:var(--feher);background:var(--panel);border:2px solid var(--vonal);border-radius:8px;padding:11px 14px}
 .hirlevel-sor input::placeholder{color:var(--halk)}
 .hirlevel-sor .gomb{font:inherit;font-weight:800;cursor:pointer}
+.tema-urlap textarea{display:block;width:100%;box-sizing:border-box;resize:vertical;font:inherit;font-size:1rem;color:var(--feher);background:var(--panel);border:2px solid var(--vonal);border-radius:8px;padding:11px 14px}
+.tema-urlap textarea::placeholder{color:var(--halk)}
+.tema-urlap .meta{margin:10px 0 16px}
+.tema-urlap .gomb{font:inherit;font-weight:800;cursor:pointer}
+.szoveg .lista{margin:0 0 14px;padding-left:1.2em}
+.szoveg .lista li{margin-bottom:6px}
 .hozzajarulas{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:.92rem;color:var(--szoveg)}
 .hozzajarulas input{width:20px;height:20px;flex:none;margin:2px 0 0;accent-color:var(--sarga)}
 .csapda{position:absolute;left:-9999px}
@@ -147,6 +153,7 @@ main>section.szamok{margin-top:clamp(36px,5vw,56px)}
 .szoveg .lede{margin-top:16px;color:var(--feher)}
 .fogalmak{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:10px 16px;margin:12px 0 0;align-items:baseline}
 .fogalmak dd{margin:0}
+.fogalmak+p{margin-top:14px}
 .archiv .lede{margin-top:14px}
 .temalink{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.95rem;margin-bottom:16px!important}
 .temalink a{color:var(--szoveg)}

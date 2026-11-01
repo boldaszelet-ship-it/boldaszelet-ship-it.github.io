@@ -3,6 +3,7 @@
 const FORRAS = "https://boldaszelet-ship-it.github.io";
 const BOLD = "https://valoban.pages.dev";
 const ORAI_KERET = 5; // ennyi feliratkozás egy IP-ről óránként: a megerősítő levél keretét védi
+const TEMA_ORZES = 180 * 86400; // ennyi ideig marad meg egy beküldött téma, utána magától törlődik
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
 
 const vissza = (ut) => new Response(null, { status: 303, headers: { location: BOLD + ut } });
@@ -44,8 +45,27 @@ async function feliratkozas(keres, env) {
   return vissza("/megerosites.html");
 }
 
+// Csak a kérdés szövege kerül a TEMAK KV-be: se IP, se név, se e-mail-cím.
+async function temakuldes(keres, env) {
+  if (!env.TEMAK) return new Response("A témaküldés még nem indult el.", { status: 503 });
+  if (![BOLD, FORRAS].includes(keres.headers.get("origin"))) return new Response("Tiltott kérés.", { status: 403 });
+  const urlap = await keres.formData();
+  if (urlap.get("weboldal")) return vissza("/tema-koszonjuk.html"); // csapdamező: ember nem látja
+  const kerdes = String(urlap.get("kerdes") || "").replace(/\s+/g, " ").trim();
+  if (kerdes.length < 8 || kerdes.length > 200) return vissza("/temat-kuldj.html?hiba=rovid");
+  if (await tulKeres(keres)) return vissza("/temat-kuldj.html?hiba=sok");
+  try {
+    await env.TEMAK.put(`${new Date().toISOString()}-${crypto.randomUUID()}`, kerdes, { expirationTtl: TEMA_ORZES });
+  } catch (e) {
+    console.error("KV-hiba");
+    return vissza("/temat-kuldj.html?hiba=rendszer");
+  }
+  return vissza("/tema-koszonjuk.html");
+}
+
 export default {
   async fetch(keres, env) {
+    if (keres.method === "POST" && new URL(keres.url).pathname === "/tema") return temakuldes(keres, env);
     if (keres.method === "POST" && new URL(keres.url).pathname === "/feliratkozas") return feliratkozas(keres, env);
     if (keres.method !== "GET" && keres.method !== "HEAD") {
       return new Response("Nem támogatott kérés.", { status: 405, headers: { allow: "GET, HEAD" } });

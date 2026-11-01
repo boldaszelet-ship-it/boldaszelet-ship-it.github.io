@@ -43,6 +43,8 @@ NS = {"a": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/sche
 BEMUTATO = {"AYiHXjghiBo"}  # a csatornabemutató 16:9, nem rész
 HIRLEVEL = False  # D-valoban-20261031-07: csak a Brevo-fiók és a tájékoztató élesítése után kapcsolható be
 FELIRATKOZAS = BOLD + "feliratkozas"  # a pages/_worker.js fogadja, ezért a látogató böngészőjébe nem kerül harmadik fél
+TEMAKULDO = True  # D-valoban-20261101-04: a main-en False, amíg a KV-kötés, a Worker és a tájékoztató nincs élesben
+TEMAKULDES = BOLD + "tema"  # szintén a _worker.js: név és e-mail nélkül, csak a kérdés szövegét tárolja
 E = lambda s: html.escape(str(s), quote=True)
 TEMAK = {
     "allatok": ("Állatok és növények", "Mekkora a legnagyobb pók, mire emlékszik az aranyhal, és miért vált színt a kaméleon? Rangsorok és tévhitek az élővilágból, mért számokkal."),
@@ -241,6 +243,16 @@ def urlap(elo=""):
 </form>"""
 
 
+def temaurlap():
+    return f"""<form class="hirlevel-urlap tema-urlap" method="post" action="{TEMAKULDES}">
+<label for="kerdes">Mire járjunk a végére?</label>
+<textarea id="kerdes" name="kerdes" rows="3" minlength="8" maxlength="200" required placeholder="Például: Tényleg nem csap kétszer ugyanoda a villám?"></textarea>
+<div class="csapda" aria-hidden="true"><label>Weboldal<input name="weboldal" tabindex="-1" autocomplete="off"></label></div>
+<p class="meta">Elég egy mondat. Nevet, elérhetőséget vagy más személyes adatot ne írj bele: csak a kérdést kérjük, visszaírni nem tudunk. A kérdést legfeljebb 180 napig őrizzük meg.</p>
+<button class="gomb" type="submit">Beküldöm</button>
+</form>"""
+
+
 KIADO = {"@type": "Organization", "name": "Valóban?", "url": BOLD, "logo": BOLD + "profil.png", "sameAs": [YT, TT, FB]}
 
 
@@ -281,7 +293,7 @@ def lap(cim, leiras, tartalom, utvonal, elo="", kep_ut="profil.png", extra="", t
 <body>
 <a class="ugras" href="#tartalom">Ugrás a tartalomra</a>
 <header class="fej"><a class="marka" href="{elo or './'}"><img src="{elo}profil.png" width="40" height="40" alt=""><span>Valóban<i>?</i></span></a>
-<nav aria-label="Fő"><a href="{elo}tevhitek.html">Tévhitek</a><a href="{elo}videok.html">Videók</a><a href="{elo}modszertan.html">Így dolgozunk</a>{f'<a href="{elo}hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}<a class="yt" href="{YT}" rel="noopener">YouTube</a></nav></header>
+<nav aria-label="Fő"><a href="{elo}tevhitek.html">Tévhitek</a><a href="{elo}videok.html">Videók</a><a href="{elo}modszertan.html">Így dolgozunk</a>{f'<a href="{elo}temat-kuldj.html">Témát küldök</a>' if TEMAKULDO else ''}{f'<a href="{elo}hirlevel.html">Hírlevél</a>' if HIRLEVEL else ''}<a class="yt" href="{YT}" rel="noopener">YouTube</a></nav></header>
 <main id="tartalom">
 {tartalom}
 </main>
@@ -290,6 +302,7 @@ def lap(cim, leiras, tartalom, utvonal, elo="", kep_ut="profil.png", extra="", t
 <p class="koveto"><a href="{YT}" rel="noopener">YouTube</a><a href="{TT}" rel="noopener">TikTok</a><a href="{FB}" rel="noopener">Facebook</a></p>
 <p>Üzemeltető: Boldurián Gábor, 1191 Budapest, Dobó Katica utca 13. · <a href="mailto:boldaszelet@gmail.com">boldaszelet@gmail.com</a> · Tárhely: GitHub, Inc. · Kiszolgálás: Cloudflare, Inc.</p>
 <p><a href="{elo}modszertan.html">Így dolgozunk</a> · <a href="{elo}adatvedelem.html">Adatkezelési tájékoztató</a> · Az oldal nem használ sütit és látogatómérést.</p>
+<p>A videók mesterséges intelligencia-alapú eszközökkel készülnek, a narráció szintetikus hang: <a href="{elo}modszertan.html">részletek</a>.</p>
 </div></footer>
 </body>
 </html>
@@ -327,10 +340,10 @@ def kezdolap(v):
 <ul class="racs">{''.join(kartya(x) for x in hosszu[:6])}</ul></section>
 <section><div class="sor"><h2>Legújabb Shorts-videók</h2><a href="videok.html#shorts">Összes</a></div>
 <ul class="racs szuk">{''.join(kartya(x) for x in shorts[:6])}</ul></section>
-{hirlevel_blokk() if HIRLEVEL else ''}<section id="igy" class="igy"><div class="sor"><h2>Így dolgozunk</h2><a href="modszertan.html">Részletesen</a></div><ol>
+{temablokk() if TEMAKULDO else ''}{hirlevel_blokk() if HIRLEVEL else ''}<section id="igy" class="igy"><div class="sor"><h2>Így dolgozunk</h2><a href="modszertan.html">Részletesen</a></div><ol>
 <li><b>Egy téma, világos válasz</b>Minden rész egy kérdésre, állításra vagy rangsorra épül. Nem az a cél, hogy jól hangozzon, hanem hogy kiderüljön, mi igaz.</li>
 <li><b>A források nyilvánosak</b>Minden videónál felsoroljuk, honnan tudjuk, amit mondunk, így bárki utánanézhet. Itt az oldalon is, videónként.</li>
-<li><b>Nyíltan a gépi hangról</b>A narrációt gép olvassa fel, nem ember. Ezt minden videó leírásában közöljük.</li>
+<li><b>Bírálat kiadás előtt</b>Minden új videó tény- és nyelvi bírálaton megy át. Ha egy állítás nem állja meg a helyét, a videó visszamegy javításra.</li>
 </ol><p class="hiba">Hibát találtál? Írd meg: <a href="mailto:boldaszelet@gmail.com">boldaszelet@gmail.com</a></p></section>
 <section class="app"><h2>A feltöltő alkalmazásról</h2><p>A „Valoban Feltolto” a csatorna saját, belső eszköze: a YouTube Data API-n keresztül tölti fel és ütemezi a csatorna saját videóit. Más felhasználók nem használják, és más fiók adataihoz nem fér hozzá. Részletek: <a href="adatvedelem.html">adatkezelési tájékoztató</a>.</p></section>"""
     ld = jsonld({"@context": "https://schema.org", "@type": "WebSite", "name": "Valóban?", "url": BOLD, "inLanguage": "hu",
@@ -338,6 +351,12 @@ def kezdolap(v):
     return lap("Valóban? – magyar ismeretterjesztő csatorna",
                "Valóban? – magyar ismeretterjesztő csatorna: ismert történetek, állítások és rangsorok, forrásokkal. Végére járunk.",
                t, "", extra=ld)
+
+
+def temablokk():
+    return f"""<section class="hirlevel"><h2>Te mit ellenőriznél?</h2>
+<p>Hallottál valamit, és nem tudod, igaz-e? Írd meg: a következő téma akár ez is lehet.</p>{temaurlap()}</section>
+"""
 
 
 def hirlevel_blokk():
@@ -500,22 +519,58 @@ def tevhitek(v):
 
 
 def modszertan():
-    bev = "Hogyan készül a Valóban?: forrásellenőrzés, kiadás előtti ellenőrzések, gépi hang és hibajavítás."
-    t = f"""<section class="szoveg"><h1>Így dolgozunk</h1><p class="lede">Azt ellenőrizzük, amit mindenki tud. A cél nem az, hogy jól hangozzon, hanem hogy kiderüljön, mi igaz, és bárki utánanézhessen.</p>
-<h2>Forrás nélkül nem állítunk</h2>
-<p>Minden videóhoz állítástábla készül: az ellenőrizhető tényállítások külön sort kapnak, a forrással és a forrás fokozatával. Gépi kapu nézi, hogy a számot, nevet vagy kizárólagos állítást tartalmazó mondatok mögött van-e forrás. Ahol a források eltérnek, a szöveg ezt megmondja, vagy a közös részükre szorítkozik. A felhasznált forrásokat minden videó oldalán felsoroljuk.</p>
+    bev = "Hogyan készül a Valóban?: állítástábla mondatról mondatra, forrásfokozatok, bírálat, kiadási kapu és hibajavítás."
+    t = f"""<section class="szoveg"><h1>Így dolgozunk</h1><p class="lede">Azt ellenőrizzük, amit mindenki hallott. A cél az, hogy kiderüljön, mi igaz, és bárki utánanézhessen.</p>
+<h2>Egy kérdésből indulunk</h2>
+<p>Minden rész egy kérdésre, állításra vagy rangsorra épül. Előbb azt tisztázzuk, mit kell bizonyítani, és milyen források kellenek hozzá. A szöveg csak ezután készül.</p>
+<h2>Mondatról mondatra: az állítástábla</h2>
+<p>Minden videóhoz állítástábla készül. Az ellenőrizhető tényállítások külön sort kapnak: a szöveg szó szerinti részletével, a forrással, a forrás fokozatával és az ellenőrzés eredményével. Így minden kimondott tény a forrásához van kötve. A számot, nevet vagy kizárólagos állítást tartalmazó mondat forrás nélkül nem mehet tovább.</p>
+<h2>Nem minden forrás egyforma</h2>
+<dl class="fogalmak"><dt><b>Elsődleges</b></dt><dd>Jogszabály, hivatalos irat, eredeti dokumentum vagy adat. Önmagában is elég, de sok témában nincs ilyen.</dd>
+<dt><b>Másodlagos</b></dt><dd>Tudományos cikk, sajtóanyag, gyártói oldal. Tényként akkor mondjuk ki, ha van mellette egy tőle független második. Ha csak egy van, a videóban megnevezzük, ki állítja.</dd>
+<dt><b>Nem forrás</b></dt><dd>Emlékezet, „közismert tény”, „általában így szokás”. Erre nem építünk.</dd></dl>
+<p>Ahol a források eltérnek, a szöveg ezt megmondja, vagy a közös részükre szorítkozik. A felhasznált forrásokat minden videó oldalán felsoroljuk.</p>
 <h2>Mit jelentenek az ítéletek?</h2>
 <dl class="fogalmak"><dt><span class="itelet igaz">Igaz</span></dt><dd>A források alátámasztják az állítást.</dd>
 <dt><span class="itelet reszben">Részben igaz</span></dt><dd>Van benne igazság, de pontosítani kell.</dd>
 <dt><span class="itelet reszben">Vitatott</span></dt><dd>A megbízható források más-más eredményre jutnak, ezért mindkettőt bemutatjuk.</dd>
 <dt><span class="itelet hamis">Tévhit</span></dt><dd>A források nem támasztják alá, vagy ellentmondanak neki.</dd></dl>
-<h2>Kiadás előtt</h2>
-<p>Egy videó csak akkor jelenik meg, ha átment a gépi tényellenőrző kapun, a tényellenőrzésen és a nyelvi ellenőrzésen. A hosszú részek ezen felül jogi és minőségi bírálatot is kapnak, ahogy az érzékeny közéleti témák is jogit. A jogi bírálatot gépi szerep végzi, nem ügyvéd.</p>
-<h2>Gépi gyártás</h2>
-<p>A Valóban? mesterséges intelligenciával támogatott gyártósoron készül: a szöveg megírásában, a bírálatban és a vágásban is gépi eszközök dolgoznak, a narrációt pedig gép olvassa fel, nem ember. A gépi narrációt minden videó leírásában közöljük. A csatorna üzemeltetője: Boldurián Gábor.</p>
+<h2>Bírálat</h2>
+<p>Minden új videó külön tény- és nyelvi bírálaton megy át. A hosszú részek, valamint az érzékeny vagy közéleti témájú videók jogi bírálatot is kapnak, a hosszú részek minőségit is. A jogi bírálat belső ellenőrzés, nem ügyvédi vélemény.</p>
+<p>A bírálatot a szöveg készítésétől elkülönített, erre kijelölt mesterséges intelligencia-szerepek végzik. Nem javítanak bele csendben a munkába, hanem tételes észrevételt adnak. Súlyos észrevételnél a videó visszamegy a gyártásba, a javítás a szövegbe és az állítástáblába is bekerül, az ellenőrzések pedig újra lefutnak.</p>
+<h2>Kiadási kapu</h2>
+<p>Egy videó csak akkor jelenik meg, ha az alábbiak mind teljesülnek. Ha bármelyik hiányzik, nem töltjük fel.</p>
+<ul class="lista"><li>Minden ellenőrizhető állításnak van forrása, és nincs nyitott súlyos észrevétel.</li>
+<li>A kép és a hang technikailag hibátlan, a képkockákat megnéztük, a hangot megmértük.</li>
+<li>A cím, a leírás és a felirat átment a nyelvi ellenőrzésen.</li>
+<li>A felhasznált képek licence rendben van, a kreditek a leírásban szerepelnek.</li></ul>
+<h2>Kiadás után</h2>
+<p>Mérjük, mit néznek és mit kérdeznek a nézők, és ez alakítja a következő témákat.{' <a href="temat-kuldj.html">Te is küldhetsz témát.</a>' if TEMAKULDO else ''}</p>
 <h2>Hibát találtál?</h2>
-<p>Írd meg a <a href="mailto:boldaszelet@gmail.com?subject=Hiba%20a%20Val%C3%B3ban%3F%20oldal%C3%A1n">boldaszelet@gmail.com</a> címre, lehetőleg a forrással együtt. Ha igazad van, kijavítjuk az oldalon és a videó leírásában. A videóban elhangzott hibát a leírásban jelezzük.</p></section>"""
+<p>Írd meg a <a href="mailto:boldaszelet@gmail.com?subject=Hiba%20a%20Val%C3%B3ban%3F%20oldal%C3%A1n">boldaszelet@gmail.com</a> címre, lehetőleg a forrással együtt. Ha igazad van, kijavítjuk az oldalon és a videó leírásában. A videóban elhangzott hibát a leírásban jelezzük.</p>
+<h2>Eszközök</h2>
+<p>A szöveget, a bírálatot és a vágást mesterséges intelligencia-alapú eszközökkel készítjük, a narráció szintetikus hang. A szintetikus narrációt minden videó leírásában jelezzük. A csatorna üzemeltetője: Boldurián Gábor.</p></section>"""
     return lap("Így dolgozunk – Valóban?", bev, t, "modszertan.html")
+
+
+def temalapok():
+    nincs = '\n<meta name="robots" content="noindex">'
+    hibak = {"rovid": "Írd le a kérdést legalább 8, legfeljebb 200 karakterben.",
+             "sok": "Túl sok beküldés érkezett innen. Próbáld újra egy óra múlva.",
+             "rendszer": "Most nem sikerült a beküldés. Próbáld újra később."}
+    jelzo = f"""<p id="hiba" class="hirlevel-hiba" role="alert" hidden></p>
+<script>(function(){{var h={json.dumps(hibak, ensure_ascii=False)}[new URLSearchParams(location.search).get('hiba')],e=document.getElementById('hiba');if(h){{e.textContent=h;e.hidden=false}}}})();</script>"""
+    return {
+        "temat-kuldj.html": lap("Küldj témát – Valóban?", "Hallottál valamit, és nem tudod, igaz-e? Küldd be a kérdésedet a Valóban? csatornának.",
+                                f"""<section class="hirlevel"><h1>Küldj témát</h1>
+<p>Hallottál valamit, és nem tudod, igaz-e? Írd meg egy mondatban. A beküldött kérdéseket átnézzük, és amelyikhez találunk megbízható forrást, abból videó lehet. Azt nem ígérjük, hogy mindegyikből lesz.</p>{jelzo}{temaurlap()}</section>""",
+                                "temat-kuldj.html"),
+        "tema-koszonjuk.html": lap("Megkaptuk – Valóban?", "Megkaptuk a témádat.",
+                                   f"""<section class="hirlevel"><h1>Megkaptuk, köszönjük</h1>
+<p>Ha a kérdésből videó lesz, a csatornán találkozol vele. Addig nézd meg, mit ellenőriztünk eddig.</p>
+<p class="gombok"><a class="gomb" href="tevhitek.html">Tévhitek</a><a class="gomb masod" href="temat-kuldj.html">Küldök még egyet</a></p></section>""",
+                                   "tema-koszonjuk.html", extra=nincs),
+    }
 
 
 def csatorna(v):
@@ -581,7 +636,7 @@ def gazdagit(videok):
 def terkep(v):
     nap = lambda ts: dt.datetime.fromtimestamp(ts, BP).date().isoformat()
     u = [(BOLD, nap(v[0]["ts"])), (BOLD + "videok.html", nap(v[0]["ts"])), (BOLD + "tevhitek.html", nap(v[0]["ts"])), (BOLD + "modszertan.html", None),
-         (BOLD + "adatvedelem.html", None)] + ([(BOLD + "hirlevel.html", None)] if HIRLEVEL else [])
+         (BOLD + "adatvedelem.html", None)] + ([(BOLD + "temat-kuldj.html", None)] if TEMAKULDO else []) + ([(BOLD + "hirlevel.html", None)] if HIRLEVEL else [])
     u += [(f"{BOLD}tema/{k}.html", nap(v[0]["ts"])) for k in TEMAK]
     u += [(f"{BOLD}v/{x['slug']}.html", x.get("ellenorizve") or nap(x["ts"])) for x in v if not vekony(x)]
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -619,6 +674,9 @@ def main():
     (WEB / "videok.html").write_text(archivum(lathato))
     (WEB / "tevhitek.html").write_text(tevhitek(lathato))
     (WEB / "modszertan.html").write_text(modszertan())
+    if TEMAKULDO:
+        for nev, tartalom in temalapok().items():
+            (WEB / nev).write_text(tartalom)
     for k in TEMAK:
         (WEB / "tema" / f"{k}.html").write_text(temalap(k, lathato))
     (WEB / "sitemap.xml").write_text(terkep(lathato))
