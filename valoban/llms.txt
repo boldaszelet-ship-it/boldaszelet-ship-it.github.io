@@ -8,6 +8,7 @@
 
 ## Cikkek
 
+- [Hét festmény, egy éjszaka: ki rabolta ki a Szépművészetit 1983-ban?](https://valoban.pages.dev/cikk/het-festmeny-egy-ejszaka-szepmuveszeti-1983.html): A Szépművészeti 1983-as kirablását az évszázad magyarországi bűntényének nevezték. A tetteseket elítélték, a képek hazatértek, a megbízó kilétét viszont nem bizonyították.
 - [Miért őrizte Amerika 32 évig a magyar Szent Koronát?](https://valoban.pages.dev/cikk/amerika-szent-korona-32-ev.html): 1945 nyarán az amerikaiak kinyitották a magyar koronázási ládát, és csak egy kardot találtak benne. A korona útja egy benzineshordótól Fort Knoxon át a Parlamentig vezetett.
 
 ## Ellenőrzött állítások
